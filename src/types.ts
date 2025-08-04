@@ -1,8 +1,8 @@
 export interface BuildRenderProps {
   /**
-   * Video source URL
+   * Parts configuration for the build render
    */
-  src: string;
+  parts: RenderBuildRequest;
 
   /**
    * Video size in pixels (width and height will be the same)
@@ -18,29 +18,26 @@ export interface BuildRenderProps {
    * Optional touch sensitivity for dragging (default: 0.01)
    */
   touchSensitivity?: number;
-
-  /**
-   * Optional delay before showing the bounce instruction in milliseconds (default: 2000)
-   */
-  instructionDelay?: number;
-
-  /**
-   * Optional custom icon URL for the drag instruction
-   */
-  instructionIcon?: string;
-
-  /**
-   * Optional callback when video loading starts
-   */
-  onLoadStart?: () => void;
-
-  /**
-   * Optional callback when video can start playing
-   */
-  onCanPlay?: () => void;
-
-  /**
-   * Optional callback with loading progress (0-100)
-   */
-  onProgress?: (progress: number) => void;
 }
+
+// API Types
+export enum PartCategory {
+  CPU = "CPU",
+  GPU = "GPU",
+  RAM = "RAM",
+  Motherboard = "Motherboard",
+  PSU = "PSU",
+  Storage = "Storage",
+  PCCase = "PCCase",
+  CPUCooler = "CPUCooler",
+}
+
+export interface RenderBuildRequest {
+  parts: {
+    [K in PartCategory]?: string[];
+  };
+}
+
+export type AvailablePartsResponse = {
+  [K in PartCategory]: string[];
+};
