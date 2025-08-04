@@ -41,7 +41,7 @@ export const useVideoScrubbing = (
   videoRef: RefObject<HTMLVideoElement | null>,
   options: UseVideoScrubbingOptions = {}
 ) => {
-  const { mouseSensitivity = 0.005, touchSensitivity = 0.01 } = options;
+  const { mouseSensitivity = 0.01, touchSensitivity = 0.01 } = options;
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);

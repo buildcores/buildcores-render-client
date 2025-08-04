@@ -56,7 +56,6 @@ export const useBuildRender = (
 
   const fetchRenderBuild = useCallback(
     async (currentParts: RenderBuildRequest) => {
-      console.log("fetchRenderBuild", currentParts.parts.PCCase);
       try {
         setIsRenderingBuild(true);
         setRenderError(null);

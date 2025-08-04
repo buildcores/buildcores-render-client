@@ -12,12 +12,11 @@ import { InstructionTooltip } from "./components/InstructionTooltip";
 export const BuildRender: React.FC<BuildRenderProps> = ({
   parts,
   size,
-  mouseSensitivity = 0.005,
+  mouseSensitivity = 0.01,
   touchSensitivity = 0.01,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadProgress, setLoadProgress] = useState(0);
   const [bouncingAllowed, setBouncingAllowed] = useState(false);
 
   // Use custom hook for build rendering
@@ -34,22 +33,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
 
   const handleLoadStartInternal = useCallback(() => {
     setIsLoading(true);
-    setLoadProgress(0);
     setBouncingAllowed(false);
-  }, []);
-
-  const handleProgressInternal = useCallback(() => {
-    if (videoRef.current) {
-      const video = videoRef.current;
-      if (video.buffered.length > 0) {
-        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        const duration = video.duration;
-        if (duration > 0) {
-          const progress = (bufferedEnd / duration) * 100;
-          setLoadProgress(progress);
-        }
-      }
-    }
   }, []);
 
   const handleCanPlayInternal = useCallback(() => {
@@ -77,7 +61,9 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     <div style={{ position: "relative", width: size, height: size }}>
       {videoSrc && (
         <video
+          key={videoSrc} // Force React to recreate video element when src changes
           ref={videoRef}
+          src={videoSrc} // Set src directly on video element
           width={size}
           height={size}
           autoPlay={true}
@@ -87,7 +73,6 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onLoadStart={handleLoadStartInternal}
-          onProgress={handleProgressInternal}
           onCanPlay={handleCanPlayInternal}
           onLoadedData={() => {
             if (videoRef.current) {
@@ -100,7 +85,6 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
             display: "block",
           }}
         >
-          <source src={videoSrc} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       )}
