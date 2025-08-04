@@ -1,0 +1,11 @@
+{
+  "name": "buildcores-render-client",
+  "version": "0.1.0",
+  "description": "Frontend package for BuildCores Render API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
