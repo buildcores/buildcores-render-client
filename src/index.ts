@@ -3,6 +3,7 @@ export type {
   BuildRenderProps,
   RenderBuildRequest,
   AvailablePartsResponse,
+  PartDetails,
 } from "./types";
 export { PartCategory } from "./types";
 export {
