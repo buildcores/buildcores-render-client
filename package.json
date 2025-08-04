@@ -1,8 +1,16 @@
 {
   "name": "@buildcores/render-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "React component for interactive 360-degree video rendering",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/buildcores/buildcores-render-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/buildcores/buildcores-render-client/issues"
+  },
+  "homepage": "https://github.com/buildcores/buildcores-render-client#readme",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
