@@ -332,6 +332,10 @@ Set the display size based on your layout needs:
 
 ISC
 
+**⚠️ YOU MUST HAVE A LICENSE TO THE BUILDCORES API TO USE THIS**
+
+To contact us, visit: [www.buildcores.com/api](https://www.buildcores.com/api)
+
 ## 🤝 Contributing
 
 Issues and pull requests are welcome! Please ensure TypeScript types are properly maintained.

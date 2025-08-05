@@ -70,6 +70,10 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
           preload="metadata"
           muted
           playsInline
+          controls={false}
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+          {...({ "x-webkit-airplay": "deny" } as any)}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           onLoadStart={handleLoadStartInternal}
@@ -79,11 +83,23 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
               videoRef.current.pause();
             }
           }}
-          style={{
-            cursor: isDragging ? "grabbing" : "grab",
-            touchAction: "none", // Prevents default touch behaviors like scrolling
-            display: "block",
-          }}
+          style={
+            {
+              cursor: isDragging ? "grabbing" : "grab",
+              touchAction: "none", // Prevents default touch behaviors like scrolling
+              display: "block",
+              // Completely hide video controls on all browsers including mobile
+              WebkitMediaControls: "none",
+              MozMediaControls: "none",
+              OMediaControls: "none",
+              msMediaControls: "none",
+              mediaControls: "none",
+              // Additional iOS-specific properties
+              WebkitTouchCallout: "none",
+              WebkitUserSelect: "none",
+              userSelect: "none",
+            } as React.CSSProperties
+          }
         >
           Your browser does not support the video tag.
         </video>
