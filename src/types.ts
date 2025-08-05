@@ -1,4 +1,4 @@
-export interface BuildRenderProps {
+export interface BuildRenderVideoProps {
   /**
    * Parts configuration for the build render.
    *
@@ -113,6 +113,72 @@ export interface BuildRenderProps {
   touchSensitivity?: number;
 }
 
+export interface BuildRenderProps {
+  /**
+   * Parts configuration for the sprite render.
+   *
+   * This object defines which PC components should be included in the 3D sprite render.
+   * Each part category contains an array with a single part ID that will be rendered.
+   *
+   * **Current Limitation**: Only 1 part per category is supported. Arrays must contain
+   * exactly one part ID per category. Future versions will support multiple parts per category.
+   *
+   * @example
+   * ```tsx
+   * const parts = {
+   *   parts: {
+   *     CPU: ["7xjqsomhr"],              // AMD Ryzen 7 9800X3D
+   *     GPU: ["z7pyphm9k"],              // ASUS GeForce RTX 5080 ASTRAL
+   *     RAM: ["dpl1iyvb5"],              // PNY DDR5
+   *     Motherboard: ["iwin2u9vx"],      // Asus ROG STRIX X870E-E GAMING WIFI
+   *     PSU: ["m4kilv190"],              // LIAN LI 1300W
+   *     Storage: ["0bkvs17po"],          // SAMSUNG 990 EVO
+   *     PCCase: ["qq9jamk7c"],           // MONTECH KING 95 PRO
+   *     CPUCooler: ["62d8zelr5"],        // ARCTIC LIQUID FREEZER 360
+   *   }
+   * };
+   *
+   * <SpriteRender parts={parts} size={300} />
+   * ```
+   */
+  parts: RenderBuildRequest;
+
+  /**
+   * Sprite size in pixels (width and height will be the same).
+   *
+   * This determines the display size of the rendered 3D sprite. The sprite sheet
+   * itself is rendered at a fixed resolution, but this controls the display size.
+   *
+   * @example
+   * ```tsx
+   * <SpriteRender parts={parts} size={300} />  // 300x300px
+   * <SpriteRender parts={parts} size={500} />  // 500x500px
+   * <SpriteRender parts={parts} size={800} />  // 800x800px - larger display
+   * ```
+   */
+  size: number;
+
+  /**
+   * Optional mouse sensitivity for dragging (default: 0.05).
+   *
+   * Controls how responsive the 3D model rotation is to mouse movements.
+   * Lower values make rotation slower and more precise, higher values make it faster.
+   *
+   * @default 0.2
+   */
+  mouseSensitivity?: number;
+
+  /**
+   * Optional touch sensitivity for dragging (default: 0.02).
+   *
+   * Controls how responsive the 3D model rotation is to touch gestures on mobile devices.
+   * Generally set similar to mouseSensitivity for consistent experience.
+   *
+   * @default 0.2
+   */
+  touchSensitivity?: number;
+}
+
 // API Types
 
 /**
@@ -177,34 +243,21 @@ export enum PartCategory {
  *     Storage: ["0bkvs17po"],          // SAMSUNG 990 EVO
  *     PCCase: ["qq9jamk7c"],           // MONTECH KING 95 PRO
  *     CPUCooler: ["62d8zelr5"],        // ARCTIC LIQUID FREEZER 360
- *   }
+ *   },
+ *   format: "video"                    // Request video format
  * };
  * ```
  *
- * @example Minimal build (only required components)
+ * @example Sprite format request
  * ```tsx
- * const minimalBuild: RenderBuildRequest = {
+ * const spriteRequest: RenderBuildRequest = {
  *   parts: {
- *     CPU: ["7xjqsomhr"],              // Single CPU
- *     Motherboard: ["iwin2u9vx"],      // Single motherboard
- *     PCCase: ["qq9jamk7c"],           // Single case
- *   }
- * };
- * ```
- *
- * @example Gaming build configuration
- * ```tsx
- * const gamingBuild: RenderBuildRequest = {
- *   parts: {
- *     CPU: ["x2thvstj3"],              // AMD Ryzen 7 9700X
- *     GPU: ["4a0mjb360"],              // PNY GeForce RTX 5060 Ti 16GB
- *     RAM: ["46rwpop35"],              // G.SKILL NEO RGB DDR5
- *     Motherboard: ["xy81tonxw"],      // Asus ROG STRIX B850-A GAMING WIFI
- *     PSU: ["v0qv6k9dp"],              // MSI 850W
- *     Storage: ["0bs8cxv4c"],          // CORSAIR T500
- *     PCCase: ["kb76dp9aw"],           // LIAN LI O11 VISION
- *     CPUCooler: ["0vajcxkzq"],        // BE QUIET PURE ROCK 2 AIR
- *   }
+ *     CPU: ["7xjqsomhr"],              // AMD Ryzen 7 9800X3D
+ *     GPU: ["z7pyphm9k"],              // ASUS GeForce RTX 5080 ASTRAL
+ *     RAM: ["dpl1iyvb5"],              // PNY DDR5
+ *     Motherboard: ["iwin2u9vx"],      // Asus ROG STRIX X870E-E GAMING WIFI
+ *   },
+ *   format: "sprite"                   // Request sprite sheet format
  * };
  * ```
  */
@@ -226,6 +279,16 @@ export interface RenderBuildRequest {
   parts: {
     [K in PartCategory]?: string[];
   };
+
+  /**
+   * Output format for the rendered build.
+   *
+   * - "video": Returns an MP4 video file for video-based 360° rotation
+   * - "sprite": Returns a sprite sheet image for frame-based 360° rotation
+   *
+   * @default "video"
+   */
+  format?: "video" | "sprite";
 }
 
 /**

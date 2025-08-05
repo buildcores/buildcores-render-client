@@ -12,7 +12,7 @@ export const API_ENDPOINTS = {
 // API Response Types
 export interface RenderBuildResponse {
   /**
-   * The rendered MP4 video as a Blob
+   * The rendered MP4 video as a Blob (when format is "video")
    */
   video: Blob;
   /**
@@ -20,6 +20,23 @@ export interface RenderBuildResponse {
    */
   metadata?: {
     duration?: number;
+    size?: number;
+    format?: string;
+  };
+}
+
+export interface RenderSpriteResponse {
+  /**
+   * The rendered sprite sheet as a Blob (when format is "sprite")
+   */
+  sprite: Blob;
+  /**
+   * Sprite sheet metadata
+   */
+  metadata?: {
+    cols?: number;
+    rows?: number;
+    totalFrames?: number;
     size?: number;
     format?: string;
   };
@@ -52,6 +69,11 @@ export const buildApiUrl = (endpoint: string): string => {
 export const renderBuildExperimental = async (
   request: RenderBuildRequest
 ): Promise<RenderBuildResponse> => {
+  const requestWithFormat = {
+    ...request,
+    format: request.format || "video", // Default to video format
+  };
+
   const response = await fetch(
     buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL),
     {
@@ -59,7 +81,7 @@ export const renderBuildExperimental = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify(requestWithFormat),
     }
   );
 
@@ -76,6 +98,45 @@ export const renderBuildExperimental = async (
     metadata: {
       size: video.size,
       format: "video/mp4",
+    },
+  };
+};
+
+export const renderSpriteExperimental = async (
+  request: RenderBuildRequest
+): Promise<RenderSpriteResponse> => {
+  const requestWithFormat = {
+    ...request,
+    format: "sprite",
+  };
+
+  const response = await fetch(
+    buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestWithFormat),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Render sprite failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const sprite = await response.blob();
+
+  return {
+    sprite,
+    metadata: {
+      cols: 12, // Default sprite grid - could be returned from API
+      rows: 6,
+      totalFrames: 72,
+      size: sprite.size,
+      format: "image/webp",
     },
   };
 };

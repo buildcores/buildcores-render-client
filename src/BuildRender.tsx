@@ -1,10 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import {
-  calculateCircularTime,
-  useVideoScrubbing,
-} from "./hooks/useVideoScrubbing";
+import { useSpriteScrubbing } from "./hooks/useSpriteScrubbing";
 import { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
-import { useBuildRender } from "./hooks/useBuildRender";
+import { useSpriteRender } from "./hooks/useSpriteRender";
 import { BuildRenderProps } from "./types";
 import { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";
 import { InstructionTooltip } from "./components/InstructionTooltip";
@@ -12,23 +9,104 @@ import { InstructionTooltip } from "./components/InstructionTooltip";
 export const BuildRender: React.FC<BuildRenderProps> = ({
   parts,
   size,
-  mouseSensitivity = 0.01,
-  touchSensitivity = 0.01,
+  mouseSensitivity = 0.2,
+  touchSensitivity = 0.2,
 }) => {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bouncingAllowed, setBouncingAllowed] = useState(false);
 
-  // Use custom hook for build rendering
-  const { videoSrc, isRenderingBuild, renderError } = useBuildRender(parts);
+  // Use custom hook for sprite rendering
+  const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
+    useSpriteRender(parts);
 
   const { value: progressValue, isBouncing } =
     useBouncePatternProgress(bouncingAllowed);
 
+  const total = spriteMetadata ? spriteMetadata.totalFrames : 72;
+  const cols = spriteMetadata ? spriteMetadata.cols : 12;
+  const rows = spriteMetadata ? spriteMetadata.rows : 6;
+  const frameRef = useRef(0);
+
+  // Image/frame sizes
+  const frameW = img ? img.width / cols : 0;
+  const frameH = img ? img.height / rows : 0;
+
+  // ---- Load sprite image ----
+  useEffect(() => {
+    if (!spriteSrc) {
+      setImg(null);
+      setIsLoading(true);
+      return;
+    }
+
+    setIsLoading(true);
+    const i = new Image();
+    i.decoding = "async";
+    i.loading = "eager";
+    i.src = spriteSrc;
+    i.onload = () => {
+      setImg(i);
+      setIsLoading(false);
+      // Start bouncing animation after delay
+      setTimeout(() => {
+        setBouncingAllowed(true);
+      }, 2000);
+    };
+    i.onerror = () => {
+      setImg(null);
+      setIsLoading(false);
+    };
+  }, [spriteSrc]);
+
+  // ---- Drawing function ----
+  const draw = useCallback(
+    (frameIndex: number) => {
+      const cnv = canvasRef.current;
+      if (!cnv || !img || !frameW || !frameH) return;
+
+      const ctx = cnv.getContext("2d");
+      if (!ctx) return;
+
+      // Backing store sized for HiDPI; CSS size stays `size`
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const targetW = Math.round(size * dpr);
+      const targetH = Math.round(size * dpr);
+      if (cnv.width !== targetW || cnv.height !== targetH) {
+        cnv.width = targetW;
+        cnv.height = targetH;
+      }
+
+      // Snap to integer frame (never between tiles)
+      let n = Math.round(frameIndex) % total;
+      if (n < 0) n += total;
+
+      const r = Math.floor(n / cols);
+      const c = n % cols;
+
+      // Use integer source rects to avoid sampling bleed across tiles
+      const sx = Math.round(c * frameW);
+      const sy = Math.round(r * frameH);
+      const sw = Math.round(frameW);
+      const sh = Math.round(frameH);
+
+      ctx.clearRect(0, 0, targetW, targetH);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+    },
+    [img, frameW, frameH, size, cols, total]
+  );
+
   const { isDragging, handleMouseDown, handleTouchStart, hasDragged } =
-    useVideoScrubbing(videoRef, {
+    useSpriteScrubbing(canvasRef, total, {
       mouseSensitivity,
       touchSensitivity,
+      onFrameChange: (newFrame: number) => {
+        frameRef.current = newFrame;
+        draw(newFrame);
+      },
     });
 
   const handleLoadStartInternal = useCallback(() => {
@@ -36,77 +114,48 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     setBouncingAllowed(false);
   }, []);
 
-  const handleCanPlayInternal = useCallback(() => {
-    setIsLoading(false);
-    // Start bouncing animation after delay
-    setTimeout(() => {
-      setBouncingAllowed(true);
-    }, 2000);
-  }, []);
-
+  // Auto-rotate when bouncing is allowed and not dragged
   useEffect(() => {
-    if (hasDragged.current || !videoRef.current) return;
+    if (hasDragged.current || !img) return;
 
-    const duration = videoRef.current.duration;
-    if (!isFinite(duration)) return;
+    // Calculate frame based on progress value (similar to video time calculation)
+    const frame = ((progressValue / 5) * total) % total;
+    frameRef.current = frame;
+    draw(frame);
+  }, [progressValue, hasDragged, img, total, draw]);
 
-    const time = calculateCircularTime(0, progressValue, 0.5, duration);
-
-    if (isFinite(time)) {
-      videoRef.current.currentTime = time;
+  // Initial draw once image is ready
+  useEffect(() => {
+    if (img && !isLoading) {
+      draw(frameRef.current);
     }
-  }, [progressValue, hasDragged]);
+  }, [img, isLoading, draw]);
 
   return (
     <div style={{ position: "relative", width: size, height: size }}>
-      {videoSrc && (
-        <video
-          key={videoSrc} // Force React to recreate video element when src changes
-          ref={videoRef}
-          src={videoSrc} // Set src directly on video element
-          width={size}
-          height={size}
-          autoPlay={true}
-          preload="metadata"
-          muted
-          playsInline
-          controls={false}
-          disablePictureInPicture
-          controlsList="nodownload nofullscreen noremoteplayback"
-          {...({ "x-webkit-airplay": "deny" } as any)}
+      {img && (
+        <canvas
+          ref={canvasRef}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
-          onLoadStart={handleLoadStartInternal}
-          onCanPlay={handleCanPlayInternal}
-          onLoadedData={() => {
-            if (videoRef.current) {
-              videoRef.current.pause();
-            }
+          style={{
+            width: size,
+            height: size,
+            cursor: isDragging ? "grabbing" : "grab",
+            touchAction: "none", // Prevents default touch behaviors like scrolling
+            display: "block",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            WebkitTouchCallout: "none",
           }}
-          style={
-            {
-              cursor: isDragging ? "grabbing" : "grab",
-              touchAction: "none", // Prevents default touch behaviors like scrolling
-              display: "block",
-              // Completely hide video controls on all browsers including mobile
-              WebkitMediaControls: "none",
-              MozMediaControls: "none",
-              OMediaControls: "none",
-              msMediaControls: "none",
-              mediaControls: "none",
-              // Additional iOS-specific properties
-              WebkitTouchCallout: "none",
-              WebkitUserSelect: "none",
-              userSelect: "none",
-            } as React.CSSProperties
-          }
-        >
-          Your browser does not support the video tag.
-        </video>
+          role="img"
+          aria-label="360° viewer"
+          onContextMenu={(e) => e.preventDefault()}
+        />
       )}
 
       <LoadingErrorOverlay
-        isVisible={isLoading || isRenderingBuild || !!renderError}
+        isVisible={isLoading || isRenderingSprite || !!renderError}
         renderError={renderError || undefined}
         size={size}
       />
@@ -114,7 +163,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       <InstructionTooltip
         isVisible={
           !isLoading &&
-          !isRenderingBuild &&
+          !isRenderingSprite &&
           !renderError &&
           isBouncing &&
           !hasDragged.current

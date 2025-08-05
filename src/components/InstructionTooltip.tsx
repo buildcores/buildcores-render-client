@@ -22,7 +22,7 @@ export const InstructionTooltip: React.FC<InstructionTooltipProps> = ({
         position: "absolute",
         top: "50%",
         left: "50%",
-        transform: `translate(-50%, -50%) translateX(${progressValue * 100}px)`,
+        transform: `translate(-50%, -50%) translateX(${progressValue * 50}px)`,
         backgroundColor: "rgba(0, 0, 0, 0.8)",
         color: "white",
         padding: "12px",

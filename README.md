@@ -37,8 +37,8 @@ function App() {
       <BuildRender
         parts={parts}
         size={500}
-        mouseSensitivity={0.01}
-        touchSensitivity={0.01}
+        mouseSensitivity={0.2}
+        touchSensitivity={0.2}
       />
     </div>
   );
@@ -57,8 +57,8 @@ The main React component for rendering interactive 3D PC builds.
 | ------------------ | -------------------- | -------- | ------- | ---------------------------------------- |
 | `parts`            | `RenderBuildRequest` | ✅       | -       | PC parts configuration object            |
 | `size`             | `number`             | ✅       | -       | Video size in pixels (square dimensions) |
-| `mouseSensitivity` | `number`             | ❌       | `0.01`  | Mouse drag sensitivity (0.001-0.1)       |
-| `touchSensitivity` | `number`             | ❌       | `0.01`  | Touch drag sensitivity (0.001-0.1)       |
+| `mouseSensitivity` | `number`             | ❌       | `0.2`   | Mouse drag sensitivity (0.001-1)         |
+| `touchSensitivity` | `number`             | ❌       | `0.2`   | Touch drag sensitivity (0.001-1)         |
 
 #### Parts Configuration
 
