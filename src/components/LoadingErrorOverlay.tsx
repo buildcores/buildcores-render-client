@@ -21,7 +21,7 @@ export const LoadingErrorOverlay: React.FC<LoadingErrorOverlayProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        backgroundColor: "rgba(0, 0, 0, 1)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -32,7 +32,9 @@ export const LoadingErrorOverlay: React.FC<LoadingErrorOverlayProps> = ({
     >
       {renderError ? (
         <>
-          <div style={{ marginBottom: "20px", fontSize: "18px" }}>
+          <div
+            style={{ marginBottom: "20px", fontSize: "18px", color: "white" }}
+          >
             Render Failed
           </div>
           <div
@@ -40,6 +42,7 @@ export const LoadingErrorOverlay: React.FC<LoadingErrorOverlayProps> = ({
               fontSize: "14px",
               textAlign: "center",
               maxWidth: size * 0.8,
+              color: "white",
             }}
           >
             {renderError}
@@ -47,7 +50,9 @@ export const LoadingErrorOverlay: React.FC<LoadingErrorOverlayProps> = ({
         </>
       ) : (
         <>
-          <div style={{ marginBottom: "20px", fontSize: "18px" }}>
+          <div
+            style={{ marginBottom: "20px", fontSize: "18px", color: "white" }}
+          >
             {"Loading Build..."}
           </div>
         </>

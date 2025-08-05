@@ -132,7 +132,14 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   }, [img, isLoading, draw]);
 
   return (
-    <div style={{ position: "relative", width: size, height: size }}>
+    <div
+      style={{
+        position: "relative",
+        width: size,
+        height: size,
+        backgroundColor: "black",
+      }}
+    >
       {img && (
         <canvas
           ref={canvasRef}
