@@ -1,6 +1,6 @@
 {
   "name": "@buildcores/render-client",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "description": "React component for interactive 360-degree video rendering",
   "repository": {

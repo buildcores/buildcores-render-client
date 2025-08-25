@@ -47,20 +47,20 @@ export interface RenderAPIService {
   /**
    * Submit a render build request
    * @param parts - The parts configuration for the build
-   * @param config - Optional API configuration (environment, auth token)
+   * @param config - API configuration (environment, auth token) - required
    * @returns Promise with the rendered MP4 video
    */
   renderBuildExperimental(
     parts: RenderBuildRequest,
-    config?: ApiConfig
+    config: ApiConfig
   ): Promise<RenderBuildResponse>;
 
   /**
    * Get available parts for building
-   * @param config - Optional API configuration (environment, auth token)
+   * @param config - API configuration (environment, auth token) - required
    * @returns Promise with available parts by category
    */
-  getAvailableParts(config?: ApiConfig): Promise<AvailablePartsResponse>;
+  getAvailableParts(config: ApiConfig): Promise<AvailablePartsResponse>;
 }
 
 // API Configuration Types
@@ -70,9 +70,9 @@ export interface ApiConfig {
 }
 
 // API URL helpers
-export const buildApiUrl = (endpoint: string, config?: ApiConfig): string => {
+export const buildApiUrl = (endpoint: string, config: ApiConfig): string => {
   const baseUrl = `${API_BASE_URL}${endpoint}`;
-  if (config?.environment) {
+  if (config.environment) {
     const separator = endpoint.includes("?") ? "&" : "?";
     return `${baseUrl}${separator}environment=${config.environment}`;
   }
@@ -80,13 +80,13 @@ export const buildApiUrl = (endpoint: string, config?: ApiConfig): string => {
 };
 
 // Helper to build request headers with auth token
-export const buildHeaders = (config?: ApiConfig): Record<string, string> => {
+export const buildHeaders = (config: ApiConfig): Record<string, string> => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     accept: "application/json",
   };
 
-  if (config?.authToken) {
+  if (config.authToken) {
     headers["Authorization"] = `Bearer ${config.authToken}`;
   }
 
@@ -96,7 +96,7 @@ export const buildHeaders = (config?: ApiConfig): Record<string, string> => {
 // API Implementation
 export const renderBuildExperimental = async (
   request: RenderBuildRequest,
-  config?: ApiConfig
+  config: ApiConfig
 ): Promise<RenderBuildResponse> => {
   const requestWithFormat = {
     ...request,
@@ -131,7 +131,7 @@ export const renderBuildExperimental = async (
 
 export const renderSpriteExperimental = async (
   request: RenderBuildRequest,
-  config?: ApiConfig
+  config: ApiConfig
 ): Promise<RenderSpriteResponse> => {
   const requestWithFormat = {
     ...request,
@@ -168,7 +168,7 @@ export const renderSpriteExperimental = async (
 };
 
 export const getAvailableParts = async (
-  config?: ApiConfig
+  config: ApiConfig
 ): Promise<AvailablePartsResponse> => {
   const response = await fetch(
     buildApiUrl(API_ENDPOINTS.AVAILABLE_PARTS, config),
