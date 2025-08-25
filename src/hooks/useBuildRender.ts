@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { RenderBuildRequest, PartCategory } from "../types";
+import { RenderBuildRequest, PartCategory, ApiConfig } from "../types";
 import { renderBuildExperimental } from "../api";
 
 /**
@@ -47,6 +47,7 @@ export interface UseBuildRenderReturn {
 
 export const useBuildRender = (
   parts: RenderBuildRequest,
+  apiConfig: ApiConfig,
   onLoadStart?: () => void
 ): UseBuildRenderReturn => {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
@@ -61,7 +62,7 @@ export const useBuildRender = (
         setRenderError(null);
         onLoadStart?.();
 
-        const response = await renderBuildExperimental(currentParts);
+        const response = await renderBuildExperimental(currentParts, apiConfig);
         const objectUrl = URL.createObjectURL(response.video);
 
         // Clean up previous video URL before setting new one
@@ -79,7 +80,7 @@ export const useBuildRender = (
         setIsRenderingBuild(false);
       }
     },
-    [onLoadStart]
+    [apiConfig, onLoadStart]
   );
 
   // Effect to call API when parts content changes (using custom equality check)

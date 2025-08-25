@@ -12,6 +12,7 @@ import { InstructionTooltip } from "./components/InstructionTooltip";
 export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   parts,
   size,
+  apiConfig,
   mouseSensitivity = 0.01,
   touchSensitivity = 0.01,
 }) => {
@@ -20,7 +21,10 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   const [bouncingAllowed, setBouncingAllowed] = useState(false);
 
   // Use custom hook for build rendering
-  const { videoSrc, isRenderingBuild, renderError } = useBuildRender(parts);
+  const { videoSrc, isRenderingBuild, renderError } = useBuildRender(
+    parts,
+    apiConfig
+  );
 
   const { value: progressValue, isBouncing } =
     useBouncePatternProgress(bouncingAllowed);

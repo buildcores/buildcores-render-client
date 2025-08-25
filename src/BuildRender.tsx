@@ -9,6 +9,7 @@ import { InstructionTooltip } from "./components/InstructionTooltip";
 export const BuildRender: React.FC<BuildRenderProps> = ({
   parts,
   size,
+  apiConfig,
   mouseSensitivity = 0.2,
   touchSensitivity = 0.2,
 }) => {
@@ -19,7 +20,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
-    useSpriteRender(parts);
+    useSpriteRender(parts, apiConfig);
 
   const { value: progressValue, isBouncing } =
     useBouncePatternProgress(bouncingAllowed);

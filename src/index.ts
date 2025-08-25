@@ -1,9 +1,12 @@
 export { BuildRender } from "./BuildRender";
+export { BuildRenderVideo } from "./BuildRenderVideo";
 export type {
   BuildRenderProps,
+  BuildRenderVideoProps,
   RenderBuildRequest,
   AvailablePartsResponse,
   PartDetails,
+  ApiConfig,
 } from "./types";
 export { PartCategory } from "./types";
 export {
@@ -26,6 +29,7 @@ export {
   API_ENDPOINTS,
   API_BASE_URL,
   buildApiUrl,
+  buildHeaders,
   renderBuildExperimental,
   renderSpriteExperimental,
   getAvailableParts,

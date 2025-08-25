@@ -1,7 +1,7 @@
 import { RenderBuildRequest, AvailablePartsResponse } from "./types";
 
 // API Configuration
-const API_BASE_URL = "https://squid-app-7aeyk.ondigitalocean.app";
+const API_BASE_URL = "https://www.renderapi.buildcores.com";
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -47,27 +47,56 @@ export interface RenderAPIService {
   /**
    * Submit a render build request
    * @param parts - The parts configuration for the build
+   * @param config - Optional API configuration (environment, auth token)
    * @returns Promise with the rendered MP4 video
    */
   renderBuildExperimental(
-    parts: RenderBuildRequest
+    parts: RenderBuildRequest,
+    config?: ApiConfig
   ): Promise<RenderBuildResponse>;
 
   /**
    * Get available parts for building
+   * @param config - Optional API configuration (environment, auth token)
    * @returns Promise with available parts by category
    */
-  getAvailableParts(): Promise<AvailablePartsResponse>;
+  getAvailableParts(config?: ApiConfig): Promise<AvailablePartsResponse>;
+}
+
+// API Configuration Types
+export interface ApiConfig {
+  environment?: "staging" | "prod";
+  authToken?: string;
 }
 
 // API URL helpers
-export const buildApiUrl = (endpoint: string): string => {
-  return `${API_BASE_URL}${endpoint}`;
+export const buildApiUrl = (endpoint: string, config?: ApiConfig): string => {
+  const baseUrl = `${API_BASE_URL}${endpoint}`;
+  if (config?.environment) {
+    const separator = endpoint.includes("?") ? "&" : "?";
+    return `${baseUrl}${separator}environment=${config.environment}`;
+  }
+  return baseUrl;
+};
+
+// Helper to build request headers with auth token
+export const buildHeaders = (config?: ApiConfig): Record<string, string> => {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    accept: "application/json",
+  };
+
+  if (config?.authToken) {
+    headers["Authorization"] = `Bearer ${config.authToken}`;
+  }
+
+  return headers;
 };
 
 // API Implementation
 export const renderBuildExperimental = async (
-  request: RenderBuildRequest
+  request: RenderBuildRequest,
+  config?: ApiConfig
 ): Promise<RenderBuildResponse> => {
   const requestWithFormat = {
     ...request,
@@ -75,12 +104,10 @@ export const renderBuildExperimental = async (
   };
 
   const response = await fetch(
-    buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL),
+    buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL, config),
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(config),
       body: JSON.stringify(requestWithFormat),
     }
   );
@@ -103,7 +130,8 @@ export const renderBuildExperimental = async (
 };
 
 export const renderSpriteExperimental = async (
-  request: RenderBuildRequest
+  request: RenderBuildRequest,
+  config?: ApiConfig
 ): Promise<RenderSpriteResponse> => {
   const requestWithFormat = {
     ...request,
@@ -111,12 +139,10 @@ export const renderSpriteExperimental = async (
   };
 
   const response = await fetch(
-    buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL),
+    buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL, config),
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: buildHeaders(config),
       body: JSON.stringify(requestWithFormat),
     }
   );
@@ -141,13 +167,16 @@ export const renderSpriteExperimental = async (
   };
 };
 
-export const getAvailableParts = async (): Promise<AvailablePartsResponse> => {
-  const response = await fetch(buildApiUrl(API_ENDPOINTS.AVAILABLE_PARTS), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export const getAvailableParts = async (
+  config?: ApiConfig
+): Promise<AvailablePartsResponse> => {
+  const response = await fetch(
+    buildApiUrl(API_ENDPOINTS.AVAILABLE_PARTS, config),
+    {
+      method: "GET",
+      headers: buildHeaders(config),
+    }
+  );
 
   if (!response.ok) {
     throw new Error(

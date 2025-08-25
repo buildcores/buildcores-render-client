@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { RenderBuildRequest } from "../types";
+import { RenderBuildRequest, ApiConfig } from "../types";
 import { renderSpriteExperimental } from "../api";
 import { arePartsEqual } from "./useBuildRender";
 
@@ -16,6 +16,7 @@ export interface UseSpriteRenderReturn {
 
 export const useSpriteRender = (
   parts: RenderBuildRequest,
+  apiConfig: ApiConfig,
   onLoadStart?: () => void
 ): UseSpriteRenderReturn => {
   const [spriteSrc, setSpriteSrc] = useState<string | null>(null);
@@ -35,7 +36,10 @@ export const useSpriteRender = (
         setRenderError(null);
         onLoadStart?.();
 
-        const response = await renderSpriteExperimental(currentParts);
+        const response = await renderSpriteExperimental(
+          currentParts,
+          apiConfig
+        );
         const objectUrl = URL.createObjectURL(response.sprite);
 
         // Clean up previous sprite URL before setting new one
@@ -60,7 +64,7 @@ export const useSpriteRender = (
         setIsRenderingSprite(false);
       }
     },
-    [onLoadStart]
+    [apiConfig, onLoadStart]
   );
 
   // Effect to call API when parts content changes (using custom equality check)

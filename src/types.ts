@@ -63,6 +63,24 @@ export interface BuildRenderVideoProps {
   size: number;
 
   /**
+   * API configuration for environment and authentication.
+   * This is required to make API calls to the BuildCores rendering service.
+   *
+   * @example
+   * ```tsx
+   * <BuildRender
+   *   parts={parts}
+   *   size={300}
+   *   apiConfig={{
+   *     environment: 'staging',
+   *     authToken: 'your-auth-token'
+   *   }}
+   * />
+   * ```
+   */
+  apiConfig: ApiConfig;
+
+  /**
    * Optional mouse sensitivity for dragging (default: 0.005).
    *
    * Controls how responsive the 3D model rotation is to mouse movements.
@@ -159,6 +177,24 @@ export interface BuildRenderProps {
   size: number;
 
   /**
+   * API configuration for environment and authentication.
+   * This is required to make API calls to the BuildCores rendering service.
+   *
+   * @example
+   * ```tsx
+   * <SpriteRender
+   *   parts={parts}
+   *   size={300}
+   *   apiConfig={{
+   *     environment: 'staging',
+   *     authToken: 'your-auth-token'
+   *   }}
+   * />
+   * ```
+   */
+  apiConfig: ApiConfig;
+
+  /**
    * Optional mouse sensitivity for dragging (default: 0.05).
    *
    * Controls how responsive the 3D model rotation is to mouse movements.
@@ -180,6 +216,39 @@ export interface BuildRenderProps {
 }
 
 // API Types
+
+/**
+ * API configuration for environment and authentication
+ */
+export interface ApiConfig {
+  /**
+   * Environment to use for API requests
+   * - 'staging': Development/testing environment
+   * - 'prod': Production environment
+   *
+   * @example
+   * ```tsx
+   * const config: ApiConfig = {
+   *   environment: 'staging',
+   *   authToken: 'your-bearer-token'
+   * };
+   * ```
+   */
+  environment?: "staging" | "prod";
+
+  /**
+   * Bearer token for API authentication
+   *
+   * @example
+   * ```tsx
+   * const config: ApiConfig = {
+   *   environment: 'prod',
+   *   authToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+   * };
+   * ```
+   */
+  authToken?: string;
+}
 
 /**
  * Enum defining all available PC part categories that can be rendered.
