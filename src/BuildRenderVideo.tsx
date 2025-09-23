@@ -15,6 +15,7 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   height,
   size,
   apiConfig,
+  useBuildRenderOptions,
   mouseSensitivity = 0.01,
   touchSensitivity = 0.01,
 }) => {
@@ -28,7 +29,9 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   // Use custom hook for build rendering
   const { videoSrc, isRenderingBuild, renderError } = useBuildRender(
     parts,
-    apiConfig
+    apiConfig,
+    undefined,
+    useBuildRenderOptions
   );
 
   const { value: progressValue, isBouncing } =

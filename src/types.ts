@@ -69,6 +69,14 @@ export interface BuildRenderVideoProps {
   apiConfig: ApiConfig;
 
   /**
+   * Options to configure the internal useBuildRender hook
+   * (e.g., choose async vs experimental rendering flow)
+   */
+  useBuildRenderOptions?: {
+    mode?: "async" | "experimental";
+  };
+
+  /**
    * Optional mouse sensitivity for dragging (default: 0.005).
    *
    * Controls how responsive the 3D model rotation is to mouse movements.
