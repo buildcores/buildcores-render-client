@@ -12,6 +12,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   height,
   size,
   apiConfig,
+  useSpriteRenderOptions,
   mouseSensitivity = 0.2,
   touchSensitivity = 0.2,
 }) => {
@@ -25,7 +26,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
-    useSpriteRender(parts, apiConfig);
+    useSpriteRender(parts, apiConfig, undefined, useSpriteRenderOptions);
 
   const { value: progressValue, isBouncing } =
     useBouncePatternProgress(bouncingAllowed);

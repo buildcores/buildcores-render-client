@@ -184,6 +184,14 @@ export interface BuildRenderProps {
   apiConfig: ApiConfig;
 
   /**
+   * Options to configure the internal useSpriteRender hook
+   * (e.g., choose async vs experimental rendering flow)
+   */
+  useSpriteRenderOptions?: {
+    mode?: "async" | "experimental";
+  };
+
+  /**
    * Optional mouse sensitivity for dragging (default: 0.05).
    *
    * Controls how responsive the 3D model rotation is to mouse movements.
