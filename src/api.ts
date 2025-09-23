@@ -36,6 +36,8 @@ export interface RenderJobStatusResponse {
   job_id: string;
   status: "queued" | "processing" | "completed" | "error";
   url?: string | null;
+  video_url?: string | null;
+  sprite_url?: string | null;
   error?: string | null;
   end_time?: string | null;
 }
@@ -208,7 +210,11 @@ export const renderBuild = async (
   for (;;) {
     const status = await getRenderBuildStatus(job_id, config);
     if (status.status === "completed") {
-      const finalUrl = status.url ?? undefined;
+      const requestedFormat = request.format ?? "video";
+      const finalUrl =
+        (requestedFormat === "sprite"
+          ? status.sprite_url || status.url || undefined
+          : status.video_url || status.url || undefined);
       if (!finalUrl) {
         throw new Error("Render job completed but no URL returned");
       }
