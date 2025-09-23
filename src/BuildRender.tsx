@@ -8,6 +8,8 @@ import { InstructionTooltip } from "./components/InstructionTooltip";
 
 export const BuildRender: React.FC<BuildRenderProps> = ({
   parts,
+  width,
+  height,
   size,
   apiConfig,
   mouseSensitivity = 0.2,
@@ -17,6 +19,9 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bouncingAllowed, setBouncingAllowed] = useState(false);
+
+  const displayW = width ?? size ?? 300;
+  const displayH = height ?? size ?? 300;
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
@@ -72,8 +77,8 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
 
       // Backing store sized for HiDPI; CSS size stays `size`
       const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const targetW = Math.round(size * dpr);
-      const targetH = Math.round(size * dpr);
+      const targetW = Math.round(displayW * dpr);
+      const targetH = Math.round(displayH * dpr);
       if (cnv.width !== targetW || cnv.height !== targetH) {
         cnv.width = targetW;
         cnv.height = targetH;
@@ -97,7 +102,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
     },
-    [img, frameW, frameH, size, cols, total]
+    [img, frameW, frameH, displayW, displayH, cols, total]
   );
 
   const { isDragging, handleMouseDown, handleTouchStart, hasDragged } =
@@ -136,8 +141,8 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     <div
       style={{
         position: "relative",
-        width: size,
-        height: size,
+        width: displayW,
+        height: displayH,
         backgroundColor: "black",
       }}
     >
@@ -147,8 +152,8 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
           style={{
-            width: size,
-            height: size,
+            width: displayW,
+            height: displayH,
             cursor: isDragging ? "grabbing" : "grab",
             touchAction: "none", // Prevents default touch behaviors like scrolling
             display: "block",
@@ -165,7 +170,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       <LoadingErrorOverlay
         isVisible={isLoading || isRenderingSprite || !!renderError}
         renderError={renderError || undefined}
-        size={size}
+        size={Math.min(displayW, displayH)}
       />
 
       <InstructionTooltip

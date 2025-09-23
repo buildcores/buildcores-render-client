@@ -43,24 +43,12 @@ export interface BuildRenderVideoProps {
   parts: RenderBuildRequest;
 
   /**
-   * Video size in pixels (width and height will be the same).
-   *
-   * This determines the resolution of the rendered 3D video. Higher values
-   * provide better quality but may impact performance.
-   *
-   * @example
-   * ```tsx
-   * <BuildRender parts={parts} size={300} />  // 300x300px
-   * <BuildRender parts={parts} size={500} />  // 500x500px
-   * <BuildRender parts={parts} size={800} />  // 800x800px - high quality
-   * ```
-   *
-   * Recommended sizes:
-   * - 300px: Good for thumbnails or small previews
-   * - 500px: Standard size for most use cases
-   * - 800px+: High quality for detailed viewing
+   * Width and height in pixels. If only `size` is provided, both width and height use it.
+   * If `width`/`height` are provided, they override `size` individually.
    */
-  size: number;
+  width?: number;
+  height?: number;
+  size?: number;
 
   /**
    * API configuration for environment and authentication.
@@ -162,19 +150,12 @@ export interface BuildRenderProps {
   parts: RenderBuildRequest;
 
   /**
-   * Sprite size in pixels (width and height will be the same).
-   *
-   * This determines the display size of the rendered 3D sprite. The sprite sheet
-   * itself is rendered at a fixed resolution, but this controls the display size.
-   *
-   * @example
-   * ```tsx
-   * <SpriteRender parts={parts} size={300} />  // 300x300px
-   * <SpriteRender parts={parts} size={500} />  // 500x500px
-   * <SpriteRender parts={parts} size={800} />  // 800x800px - larger display
-   * ```
+   * Width and height in pixels. If only `size` is provided, both width and height use it.
+   * If `width`/`height` are provided, they override `size` individually.
    */
-  size: number;
+  width?: number;
+  height?: number;
+  size?: number;
 
   /**
    * API configuration for environment and authentication.

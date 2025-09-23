@@ -11,6 +11,8 @@ import { InstructionTooltip } from "./components/InstructionTooltip";
 
 export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   parts,
+  width,
+  height,
   size,
   apiConfig,
   mouseSensitivity = 0.01,
@@ -19,6 +21,9 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bouncingAllowed, setBouncingAllowed] = useState(false);
+
+  const displayW = width ?? size ?? 300;
+  const displayH = height ?? size ?? 300;
 
   // Use custom hook for build rendering
   const { videoSrc, isRenderingBuild, renderError } = useBuildRender(
@@ -62,14 +67,14 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   }, [progressValue, hasDragged]);
 
   return (
-    <div style={{ position: "relative", width: size, height: size }}>
+    <div style={{ position: "relative", width: displayW, height: displayH }}>
       {videoSrc && (
         <video
           key={videoSrc} // Force React to recreate video element when src changes
           ref={videoRef}
           src={videoSrc} // Set src directly on video element
-          width={size}
-          height={size}
+          width={displayW}
+          height={displayH}
           autoPlay={true}
           preload="metadata"
           muted
@@ -112,7 +117,7 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
       <LoadingErrorOverlay
         isVisible={isLoading || isRenderingBuild || !!renderError}
         renderError={renderError || undefined}
-        size={size}
+        size={Math.min(displayW, displayH)}
       />
 
       <InstructionTooltip
