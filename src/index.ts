@@ -20,7 +20,7 @@ export {
 export { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
 export { useBuildRender, arePartsEqual } from "./hooks/useBuildRender";
 export { useSpriteRender } from "./hooks/useSpriteRender";
-export type { UseBuildRenderReturn } from "./hooks/useBuildRender";
+export type { UseBuildRenderReturn, UseBuildRenderOptions } from "./hooks/useBuildRender";
 export type { UseSpriteRenderReturn } from "./hooks/useSpriteRender";
 export { DragIcon } from "./components/DragIcon";
 export { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";

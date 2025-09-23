@@ -1,4 +1,4 @@
-import { RenderBuildRequest, AvailablePartsResponse } from "./types";
+import { RenderBuildRequest, AvailablePartsResponse, ApiConfig } from "./types";
 
 // API Configuration
 const API_BASE_URL = "https://www.renderapi.buildcores.com";
@@ -6,6 +6,7 @@ const API_BASE_URL = "https://www.renderapi.buildcores.com";
 // API Endpoints
 export const API_ENDPOINTS = {
   RENDER_BUILD_EXPERIMENTAL: "/render-build-experimental",
+  RENDER_BUILD: "/render-build",
   AVAILABLE_PARTS: "/available-parts",
 } as const;
 
@@ -23,6 +24,25 @@ export interface RenderBuildResponse {
     size?: number;
     format?: string;
   };
+}
+
+// Async render job types (new endpoints)
+export interface RenderJobCreateResponse {
+  job_id: string;
+  status: "queued" | "processing" | "completed" | "error";
+}
+
+export interface RenderJobStatusResponse {
+  job_id: string;
+  status: "queued" | "processing" | "completed" | "error";
+  url?: string | null;
+  error?: string | null;
+  end_time?: string | null;
+}
+
+export interface RenderBuildAsyncResponse {
+  /** Final URL to the rendered MP4 (or sprite) asset */
+  videoUrl: string;
 }
 
 export interface RenderSpriteResponse {
@@ -63,12 +83,6 @@ export interface RenderAPIService {
   getAvailableParts(config: ApiConfig): Promise<AvailablePartsResponse>;
 }
 
-// API Configuration Types
-export interface ApiConfig {
-  environment?: "staging" | "prod";
-  authToken?: string;
-}
-
 // API URL helpers
 export const buildApiUrl = (endpoint: string, config: ApiConfig): string => {
   const baseUrl = `${API_BASE_URL}${endpoint}`;
@@ -92,6 +106,8 @@ export const buildHeaders = (config: ApiConfig): Record<string, string> => {
 
   return headers;
 };
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // API Implementation
 export const renderBuildExperimental = async (
@@ -127,6 +143,87 @@ export const renderBuildExperimental = async (
       format: "video/mp4",
     },
   };
+};
+
+// New async endpoints implementation
+export const createRenderBuildJob = async (
+  request: RenderBuildRequest,
+  config: ApiConfig
+): Promise<RenderJobCreateResponse> => {
+  const body = {
+    parts: request.parts,
+    // If provided, forward format; default handled server-side but we keep explicit default
+    ...(request.format ? { format: request.format } : {}),
+  };
+
+  const response = await fetch(buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config), {
+    method: "POST",
+    headers: buildHeaders(config),
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Create render job failed: ${response.status} ${response.statusText}`);
+  }
+
+  const data = (await response.json()) as RenderJobCreateResponse;
+  if (!data?.job_id) {
+    throw new Error("Create render job failed: missing job_id in response");
+  }
+  return data;
+};
+
+export const getRenderBuildStatus = async (
+  jobId: string,
+  config: ApiConfig
+): Promise<RenderJobStatusResponse> => {
+  const url = buildApiUrl(`${API_ENDPOINTS.RENDER_BUILD}/${encodeURIComponent(jobId)}`, config);
+  const response = await fetch(url, {
+    method: "GET",
+    headers: buildHeaders(config),
+  });
+
+  if (response.status === 404) {
+    throw new Error("Render job not found");
+  }
+  if (!response.ok) {
+    throw new Error(`Get render job status failed: ${response.status} ${response.statusText}`);
+  }
+
+  return (await response.json()) as RenderJobStatusResponse;
+};
+
+export const renderBuild = async (
+  request: RenderBuildRequest,
+  config: ApiConfig,
+  options?: { pollIntervalMs?: number; timeoutMs?: number }
+): Promise<RenderBuildAsyncResponse> => {
+  const pollIntervalMs = options?.pollIntervalMs ?? 1500;
+  const timeoutMs = options?.timeoutMs ?? 120_000; // 2 minutes default
+
+  const { job_id } = await createRenderBuildJob(request, config);
+
+  const start = Date.now();
+  // Poll until completed or error or timeout
+  for (;;) {
+    const status = await getRenderBuildStatus(job_id, config);
+    if (status.status === "completed") {
+      const finalUrl = status.url ?? undefined;
+      if (!finalUrl) {
+        throw new Error("Render job completed but no URL returned");
+      }
+      return { videoUrl: finalUrl };
+    }
+    if (status.status === "error") {
+      throw new Error(status.error || "Render job failed");
+    }
+
+    if (Date.now() - start > timeoutMs) {
+      throw new Error("Timed out waiting for render job to complete");
+    }
+
+    await sleep(pollIntervalMs);
+  }
 };
 
 export const renderSpriteExperimental = async (

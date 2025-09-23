@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { RenderBuildRequest, PartCategory, ApiConfig } from "../types";
-import { renderBuildExperimental } from "../api";
+import { renderBuild, renderBuildExperimental } from "../api";
 
 /**
  * Compares two RenderBuildRequest objects for equality by checking if the same IDs
@@ -45,10 +45,20 @@ export interface UseBuildRenderReturn {
   renderError: string | null;
 }
 
+export interface UseBuildRenderOptions {
+  /**
+   * Choose which backend flow to use
+   * - 'async' (default): uses /render-build and polls /render-build/{jobId}
+   * - 'experimental': uses /render-build-experimental and returns Blob
+   */
+  mode?: "async" | "experimental";
+}
+
 export const useBuildRender = (
   parts: RenderBuildRequest,
   apiConfig: ApiConfig,
-  onLoadStart?: () => void
+  onLoadStart?: () => void,
+  options?: UseBuildRenderOptions
 ): UseBuildRenderReturn => {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [isRenderingBuild, setIsRenderingBuild] = useState(false);
@@ -62,16 +72,26 @@ export const useBuildRender = (
         setRenderError(null);
         onLoadStart?.();
 
-        const response = await renderBuildExperimental(currentParts, apiConfig);
-        const objectUrl = URL.createObjectURL(response.video);
-
-        // Clean up previous video URL before setting new one
-        setVideoSrc((prevSrc) => {
-          if (prevSrc) {
-            URL.revokeObjectURL(prevSrc);
-          }
-          return objectUrl;
-        });
+        const mode = options?.mode ?? "async";
+        if (mode === "experimental") {
+          const response = await renderBuildExperimental(currentParts, apiConfig);
+          const objectUrl = URL.createObjectURL(response.video);
+          setVideoSrc((prevSrc: string | null) => {
+            if (prevSrc && prevSrc.startsWith("blob:")) {
+              URL.revokeObjectURL(prevSrc);
+            }
+            return objectUrl;
+          });
+        } else {
+          const { videoUrl } = await renderBuild(currentParts, apiConfig);
+          // Clean up previous object URL (if any) before setting new one
+          setVideoSrc((prevSrc: string | null) => {
+            if (prevSrc && prevSrc.startsWith("blob:")) {
+              URL.revokeObjectURL(prevSrc);
+            }
+            return videoUrl;
+          });
+        }
       } catch (error) {
         setRenderError(
           error instanceof Error ? error.message : "Failed to render build"
@@ -80,7 +100,7 @@ export const useBuildRender = (
         setIsRenderingBuild(false);
       }
     },
-    [apiConfig, onLoadStart]
+    [apiConfig, onLoadStart, options?.mode]
   );
 
   // Effect to call API when parts content changes (using custom equality check)
@@ -98,7 +118,7 @@ export const useBuildRender = (
   // Cleanup effect for component unmount
   useEffect(() => {
     return () => {
-      if (videoSrc) {
+      if (videoSrc && videoSrc.startsWith("blob:")) {
         URL.revokeObjectURL(videoSrc);
       }
     };
