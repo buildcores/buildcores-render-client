@@ -1,4 +1,4 @@
-import { RenderBuildRequest, AvailablePartsResponse, ApiConfig } from "./types";
+import { RenderBuildRequest, AvailablePartsResponse, ApiConfig, PartCategory, GetAvailablePartsOptions } from "./types";
 
 // API Configuration
 const API_BASE_URL = "https://www.renderapi.buildcores.com";
@@ -82,7 +82,11 @@ export interface RenderAPIService {
    * @param config - API configuration (environment, auth token) - required
    * @returns Promise with available parts by category
    */
-  getAvailableParts(config: ApiConfig): Promise<AvailablePartsResponse>;
+  getAvailableParts(
+    category: PartCategory,
+    config: ApiConfig,
+    options?: GetAvailablePartsOptions
+  ): Promise<AvailablePartsResponse>;
 }
 
 // API URL helpers
@@ -271,15 +275,22 @@ export const renderSpriteExperimental = async (
 };
 
 export const getAvailableParts = async (
-  config: ApiConfig
+  category: PartCategory,
+  config: ApiConfig,
+  options?: GetAvailablePartsOptions
 ): Promise<AvailablePartsResponse> => {
-  const response = await fetch(
-    buildApiUrl(API_ENDPOINTS.AVAILABLE_PARTS, config),
-    {
-      method: "GET",
-      headers: buildHeaders(config),
-    }
-  );
+  const base = buildApiUrl(API_ENDPOINTS.AVAILABLE_PARTS, config);
+  const params = new URLSearchParams();
+  params.set("category", category);
+  if (typeof options?.limit === "number") params.set("limit", String(options.limit));
+  if (typeof options?.skip === "number") params.set("skip", String(options.skip));
+  const separator = base.includes("?") ? "&" : "?";
+  const url = `${base}${separator}${params.toString()}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: buildHeaders(config),
+  });
 
   if (!response.ok) {
     throw new Error(
@@ -287,7 +298,7 @@ export const getAvailableParts = async (
     );
   }
 
-  return response.json();
+  return (await response.json()) as AvailablePartsResponse;
 };
 
 // Export the base URL for external use

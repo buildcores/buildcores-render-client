@@ -415,6 +415,44 @@ export interface PartDetails {
   image: string;
 }
 
-export type AvailablePartsResponse = {
-  [K in PartCategory]: PartDetails[];
-};
+/**
+ * Pagination metadata for available parts responses
+ */
+export interface AvailablePartsPagination {
+  /** Total number of parts available for this category */
+  total: number;
+  /** Number of parts returned in this response */
+  limit: number;
+  /** Number of parts skipped */
+  skip: number;
+  /** Whether there are more parts available */
+  hasNext: boolean;
+  /** Whether there are previous parts available */
+  hasPrev: boolean;
+}
+
+/**
+ * Response envelope for the available parts endpoint.
+ * Returns parts for the requested category under `data` keyed by category name.
+ */
+export interface AvailablePartsResponse {
+  /**
+   * Parts grouped by category. Only the requested category key is expected
+   * to be present in the response.
+   */
+  data: Partial<Record<PartCategory, PartDetails[]>>;
+  /** The requested category */
+  category: PartCategory;
+  /** Optional pagination information */
+  pagination?: AvailablePartsPagination;
+}
+
+/**
+ * Query options for fetching available parts
+ */
+export interface GetAvailablePartsOptions {
+  /** Number of parts to return (default 20, min 1, max 100) */
+  limit?: number;
+  /** Number of parts to skip for pagination (default 0) */
+  skip?: number;
+}

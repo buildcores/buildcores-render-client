@@ -7,6 +7,7 @@ export type {
   AvailablePartsResponse,
   PartDetails,
   ApiConfig,
+  GetAvailablePartsOptions,
 } from "./types";
 export { PartCategory } from "./types";
 export {
