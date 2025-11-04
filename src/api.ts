@@ -123,6 +123,9 @@ export const renderBuildExperimental = async (
   const requestWithFormat = {
     ...request,
     format: request.format || "video", // Default to video format
+    // Include width and height if provided
+    ...(request.width !== undefined ? { width: request.width } : {}),
+    ...(request.height !== undefined ? { height: request.height } : {}),
   };
 
   const response = await fetch(
@@ -160,6 +163,9 @@ export const createRenderBuildJob = async (
     parts: request.parts,
     // If provided, forward format; default handled server-side but we keep explicit default
     ...(request.format ? { format: request.format } : {}),
+    // Include width and height if provided
+    ...(request.width !== undefined ? { width: request.width } : {}),
+    ...(request.height !== undefined ? { height: request.height } : {}),
   };
 
   const response = await fetch(buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config), {
@@ -243,6 +249,9 @@ export const renderSpriteExperimental = async (
   const requestWithFormat = {
     ...request,
     format: "sprite",
+    // Include width and height if provided
+    ...(request.width !== undefined ? { width: request.width } : {}),
+    ...(request.height !== undefined ? { height: request.height } : {}),
   };
 
   const response = await fetch(

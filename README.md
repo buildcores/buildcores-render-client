@@ -69,6 +69,9 @@ interface RenderBuildRequest {
   parts: {
     [K in PartCategory]?: string[];
   };
+  format?: "video" | "sprite";
+  width?: number;  // Optional: Canvas pixel width (256-2000)
+  height?: number; // Optional: Canvas pixel height (256-2000)
 }
 
 // Available part categories
@@ -85,6 +88,8 @@ enum PartCategory {
 ```
 
 **Current Limitation**: Each category array must contain exactly one part ID. Multiple parts per category will be supported in future versions.
+
+**Resolution Control**: You can specify custom `width` and `height` (both must be provided together, 256-2000 pixels) for higher or lower quality renders. If not specified, the default resolution is used.
 
 #### Examples
 
@@ -117,6 +122,27 @@ const caseOnly = {
 };
 
 <BuildRender parts={caseOnly} size={500} />;
+```
+
+**Custom Resolution (High Quality)**
+
+```tsx
+const highResBuild = {
+  parts: {
+    CPU: ["7xjqsomhr"],
+    GPU: ["z7pyphm9k"],
+    RAM: ["dpl1iyvb5"],
+    Motherboard: ["iwin2u9vx"],
+    PSU: ["m4kilv190"],
+    Storage: ["0bkvs17po"],
+    PCCase: ["qq9jamk7c"],
+    CPUCooler: ["62d8zelr5"],
+  },
+  width: 1920,   // Custom resolution width
+  height: 1080,  // Custom resolution height
+};
+
+<BuildRender parts={highResBuild} size={500} />;
 ```
 
 ### `getAvailableParts()` Function

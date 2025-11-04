@@ -355,6 +355,36 @@ export interface RenderBuildRequest {
    * @default "video"
    */
   format?: "video" | "sprite";
+
+  /**
+   * Desired canvas pixel width (256-2000).
+   * Must be provided together with height.
+   *
+   * @example
+   * ```tsx
+   * const request: RenderBuildRequest = {
+   *   parts: { CPU: ["7xjqsomhr"] },
+   *   width: 1920,
+   *   height: 1080
+   * };
+   * ```
+   */
+  width?: number;
+
+  /**
+   * Desired canvas pixel height (256-2000).
+   * Must be provided together with width.
+   *
+   * @example
+   * ```tsx
+   * const request: RenderBuildRequest = {
+   *   parts: { CPU: ["7xjqsomhr"] },
+   *   width: 1920,
+   *   height: 1080
+   * };
+   * ```
+   */
+  height?: number;
 }
 
 /**
