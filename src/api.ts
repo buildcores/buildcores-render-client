@@ -126,6 +126,8 @@ export const renderBuildExperimental = async (
     // Include width and height if provided
     ...(request.width !== undefined ? { width: request.width } : {}),
     ...(request.height !== undefined ? { height: request.height } : {}),
+    // Include profile if provided
+    ...(request.profile ? { profile: request.profile } : {}),
   };
 
   const response = await fetch(
@@ -166,6 +168,8 @@ export const createRenderBuildJob = async (
     // Include width and height if provided
     ...(request.width !== undefined ? { width: request.width } : {}),
     ...(request.height !== undefined ? { height: request.height } : {}),
+    // Include profile if provided
+    ...(request.profile ? { profile: request.profile } : {}),
   };
 
   const response = await fetch(buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config), {
@@ -252,6 +256,8 @@ export const renderSpriteExperimental = async (
     // Include width and height if provided
     ...(request.width !== undefined ? { width: request.width } : {}),
     ...(request.height !== undefined ? { height: request.height } : {}),
+    // Include profile if provided
+    ...(request.profile ? { profile: request.profile } : {}),
   };
 
   const response = await fetch(

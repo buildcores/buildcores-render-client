@@ -7,7 +7,7 @@ import './App.css';
 // ===========================================
 const API_CONFIG = {
   environment: 'staging',  // or 'staging'
-  authToken: 'test'  // Replace with your actual token
+  authToken: 'test-token'  // Replace with your actual token
 };
 // ===========================================
 
@@ -29,21 +29,27 @@ function App() {
   const [height, setHeight] = useState(1024);
   const [useCustomResolution, setUseCustomResolution] = useState(false);
   
+  // Quality profile control
+  const [profile, setProfile] = useState('cinematic');
+  
   // Track applied resolution (what's currently rendered)
   const [appliedWidth, setAppliedWidth] = useState(1024);
   const [appliedHeight, setAppliedHeight] = useState(1024);
   const [appliedCustomResolution, setAppliedCustomResolution] = useState(false);
+  const [appliedProfile, setAppliedProfile] = useState('cinematic');
   const [renderKey, setRenderKey] = useState(0); // Force re-render by changing key
 
   // Check if settings have changed
   const hasChanges = useCustomResolution !== appliedCustomResolution || 
-                     (useCustomResolution && (width !== appliedWidth || height !== appliedHeight));
+                     (useCustomResolution && (width !== appliedWidth || height !== appliedHeight)) ||
+                     profile !== appliedProfile;
 
   // Apply new resolution and trigger re-render
   const handleRerender = () => {
     setAppliedWidth(width);
     setAppliedHeight(height);
     setAppliedCustomResolution(useCustomResolution);
+    setAppliedProfile(profile);
     setRenderKey(prev => prev + 1); // Increment to force re-render
   };
 
@@ -103,21 +109,23 @@ function App() {
       CPUCooler: ["62d8zelr5"],        // ARCTIC LIQUID FREEZER 360
     },
     // Use applied resolution settings (not pending ones)
-    ...(appliedCustomResolution ? { width: appliedWidth, height: appliedHeight } : {})
+    ...(appliedCustomResolution ? { width: appliedWidth, height: appliedHeight } : {}),
+    // Include quality profile
+    profile: appliedProfile
   };
 
   return (
     <div className="App">
       <div className="container">
         <header className="header">
-          <h1>🖥️ BuildRender Demo</h1>
+          <h1>BuildRender Demo</h1>
           <p className="subtitle">Interactive 360° PC Build Visualization</p>
         </header>
 
         {/* Resolution Controls */}
         <div className="resolution-controls">
           <div className="control-header">
-            <h3>🎨 Resolution Settings</h3>
+            <h3>Resolution Settings</h3>
             <label className="toggle-switch">
               <input
                 type="checkbox"
@@ -172,15 +180,34 @@ function App() {
               </div>
             </div>
           )}
-
-          {hasChanges && (
-            <div className="rerender-button-container">
-              <button className="rerender-button" onClick={handleRerender}>
-                🔄 Re-render with New Settings
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Quality Profile Controls */}
+        <div className="resolution-controls">
+          <div className="control-header">
+            <h3>Quality Profile</h3>
+          </div>
+          
+          <div className="quality-select-container">
+            <select 
+              value={profile} 
+              onChange={(e) => setProfile(e.target.value)}
+              className="quality-select"
+            >
+              <option value="cinematic">Cinematic - All effects (shadows, AO, bloom)</option>
+              <option value="flat">Flat - No effects, clean product shots</option>
+              <option value="fast">Fast - Minimal rendering, fastest speed</option>
+            </select>
+          </div>
+        </div>
+
+        {hasChanges && (
+          <div className="rerender-button-container">
+            <button className="rerender-button" onClick={handleRerender}>
+              Re-render with New Settings
+            </button>
+          </div>
+        )}
 
         <div className="demo-section">
           <div className="demo-wrapper">
@@ -195,7 +222,7 @@ function App() {
           </div>
 
           <div className="instructions">
-            <p>👆 Drag to rotate the build 360°</p>
+            <p>Drag to rotate the build 360°</p>
             {appliedCustomResolution && (
               <p className="resolution-info">
                 Rendered at {appliedWidth}×{appliedHeight}px
@@ -204,6 +231,12 @@ function App() {
                 )}
               </p>
             )}
+            <p className="quality-info">
+              Quality: <strong>{appliedProfile}</strong>
+              {appliedProfile === 'cinematic' && ' (All effects enabled)'}
+              {appliedProfile === 'flat' && ' (No effects, clean look)'}
+              {appliedProfile === 'fast' && ' (Minimal rendering)'}
+            </p>
           </div>
         </div>
 

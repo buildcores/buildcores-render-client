@@ -5,6 +5,8 @@ import { useSpriteRender } from "./hooks/useSpriteRender";
 import { BuildRenderProps } from "./types";
 import { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";
 import { InstructionTooltip } from "./components/InstructionTooltip";
+import { useZoomPan } from "./hooks/useZoomPan";
+import type { WheelEvent as ReactWheelEvent } from "react";
 
 export const BuildRender: React.FC<BuildRenderProps> = ({
   parts,
@@ -17,6 +19,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   touchSensitivity = 0.2,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bouncingAllowed, setBouncingAllowed] = useState(false);
@@ -35,6 +38,16 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   const cols = spriteMetadata ? spriteMetadata.cols : 12;
   const rows = spriteMetadata ? spriteMetadata.rows : 6;
   const frameRef = useRef(0);
+
+  const {
+    scale,
+    handleWheel: handleZoomWheel,
+    handleTouchStart: handleZoomTouchStart,
+    reset: resetZoom,
+  } = useZoomPan({
+    displayWidth: displayW,
+    displayHeight: displayH,
+  });
 
   // Image/frame sizes
   const frameW = img ? img.width / cols : 0;
@@ -101,9 +114,15 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       ctx.clearRect(0, 0, targetW, targetH);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+
+      const scaledW = targetW * scale;
+      const scaledH = targetH * scale;
+      const offsetX = -((scaledW - targetW) / 2);
+      const offsetY = -((scaledH - targetH) / 2);
+
+      ctx.drawImage(img, sx, sy, sw, sh, offsetX, offsetY, scaledW, scaledH);
     },
-    [img, frameW, frameH, displayW, displayH, cols, total]
+    [img, frameW, frameH, displayW, displayH, cols, total, scale]
   );
 
   const { isDragging, handleMouseDown, handleTouchStart, hasDragged } =
@@ -131,27 +150,96 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     draw(frame);
   }, [progressValue, hasDragged, img, total, draw]);
 
-  // Initial draw once image is ready
+  // Reset zoom when sprite changes or container size updates
+  useEffect(() => {
+    resetZoom();
+  }, [spriteSrc, displayW, displayH, resetZoom]);
+
+  // Add native wheel event listener to prevent scrolling AND handle zoom
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleNativeWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      // Manually trigger zoom since we're preventing the React event
+      const deltaY =
+        event.deltaMode === 1
+          ? event.deltaY * 16
+          : event.deltaMode === 2
+          ? event.deltaY * (displayH ?? 300)
+          : event.deltaY;
+
+      const zoomFactor = Math.exp(-deltaY * 0.0015);
+      const nextScale = scale * zoomFactor;
+      
+      // We need to call the zoom handler directly
+      // Create a synthetic React event-like object
+      const syntheticEvent = {
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        deltaY: event.deltaY,
+        deltaMode: event.deltaMode,
+        currentTarget: container,
+      } as any;
+      
+      handleZoomWheel(syntheticEvent);
+      hasDragged.current = true;
+    };
+
+    // Add listener to container to catch all wheel events
+    container.addEventListener('wheel', handleNativeWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleNativeWheel);
+    };
+  }, [handleZoomWheel, scale, displayH]);
+
+  // Initial draw once image is ready or zoom changes
   useEffect(() => {
     if (img && !isLoading) {
       draw(frameRef.current);
     }
   }, [img, isLoading, draw]);
 
+  const handleCanvasTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLCanvasElement>) => {
+      if (handleZoomTouchStart(event)) {
+        hasDragged.current = true;
+        return;
+      }
+
+      handleTouchStart(event);
+    },
+    [handleZoomTouchStart, handleTouchStart, hasDragged]
+  );
+
+  const handleCanvasWheel = useCallback(
+    (event: ReactWheelEvent<Element>) => {
+      hasDragged.current = true;
+      handleZoomWheel(event);
+    },
+    [handleZoomWheel, hasDragged]
+  );
+
   return (
     <div
+      ref={containerRef}
       style={{
         position: "relative",
         width: displayW,
         height: displayH,
         backgroundColor: "black",
+        overflow: "hidden",
       }}
     >
       {img && (
         <canvas
           ref={canvasRef}
           onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
+          onTouchStart={handleCanvasTouchStart}
           style={{
             width: displayW,
             height: displayH,

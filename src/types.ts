@@ -385,6 +385,31 @@ export interface RenderBuildRequest {
    * ```
    */
   height?: number;
+
+  /**
+   * Render quality profile that controls visual effects and rendering speed.
+   *
+   * - **cinematic**: All effects enabled (shadows, ambient occlusion, bloom) for highest quality
+   * - **flat**: No effects for clean, simple product shots
+   * - **fast**: Minimal rendering for fastest processing speed
+   *
+   * @example
+   * ```tsx
+   * const request: RenderBuildRequest = {
+   *   parts: { CPU: ["7xjqsomhr"] },
+   *   profile: 'cinematic'  // High quality with all effects
+   * };
+   * ```
+   *
+   * @example Fast rendering
+   * ```tsx
+   * const request: RenderBuildRequest = {
+   *   parts: { CPU: ["7xjqsomhr"] },
+   *   profile: 'fast'  // Quick render, minimal effects
+   * };
+   * ```
+   */
+  profile?: 'cinematic' | 'flat' | 'fast';
 }
 
 /**
