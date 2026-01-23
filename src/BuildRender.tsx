@@ -1,7 +1,7 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { useSpriteScrubbing } from "./hooks/useSpriteScrubbing";
 import { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
-import { useSpriteRender } from "./hooks/useSpriteRender";
+import { useSpriteRender, SpriteRenderInput } from "./hooks/useSpriteRender";
 import { BuildRenderProps } from "./types";
 import { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";
 import { InstructionTooltip } from "./components/InstructionTooltip";
@@ -10,6 +10,7 @@ import type { WheelEvent as ReactWheelEvent } from "react";
 
 export const BuildRender: React.FC<BuildRenderProps> = ({
   parts,
+  shareCode,
   width,
   height,
   size,
@@ -17,6 +18,9 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   useSpriteRenderOptions,
   mouseSensitivity = 0.2,
   touchSensitivity = 0.2,
+  showGrid,
+  cameraOffsetX,
+  gridSettings,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -27,9 +31,30 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   const displayW = width ?? size ?? 300;
   const displayH = height ?? size ?? 300;
 
+  // Build the render input - prefer shareCode if provided (preserves interactive state like case fan slots)
+  const renderInput: SpriteRenderInput = useMemo(() => {
+    if (shareCode) {
+      return { 
+        type: 'shareCode', 
+        shareCode, 
+        profile: parts?.profile,
+        showGrid,
+        cameraOffsetX,
+        gridSettings,
+      };
+    }
+    return { 
+      type: 'parts', 
+      parts: parts!,
+      showGrid,
+      cameraOffsetX,
+      gridSettings,
+    };
+  }, [shareCode, parts, showGrid, cameraOffsetX, gridSettings]);
+
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
-    useSpriteRender(parts, apiConfig, undefined, useSpriteRenderOptions);
+    useSpriteRender(renderInput, apiConfig, undefined, useSpriteRenderOptions);
 
   const { value: progressValue, isBouncing } =
     useBouncePatternProgress(bouncingAllowed);

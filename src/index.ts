@@ -8,6 +8,14 @@ export type {
   PartDetails,
   ApiConfig,
   GetAvailablePartsOptions,
+  // New types for build and parts API
+  PartDetailsWithCategory,
+  BuildResponse,
+  PartsResponse,
+  RenderByShareCodeOptions,
+  RenderByShareCodeJobResponse,
+  RenderByShareCodeResponse,
+  GridSettings,
 } from "./types";
 export { PartCategory } from "./types";
 export {
@@ -22,7 +30,7 @@ export { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
 export { useBuildRender, arePartsEqual } from "./hooks/useBuildRender";
 export { useSpriteRender } from "./hooks/useSpriteRender";
 export type { UseBuildRenderReturn, UseBuildRenderOptions } from "./hooks/useBuildRender";
-export type { UseSpriteRenderReturn, UseSpriteRenderOptions } from "./hooks/useSpriteRender";
+export type { UseSpriteRenderReturn, UseSpriteRenderOptions, SpriteRenderInput } from "./hooks/useSpriteRender";
 export { DragIcon } from "./components/DragIcon";
 export { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";
 export { InstructionTooltip } from "./components/InstructionTooltip";
@@ -34,6 +42,11 @@ export {
   renderBuildExperimental,
   renderSpriteExperimental,
   getAvailableParts,
+  // New API functions for build and parts
+  getBuildByShareCode,
+  getPartsByIds,
+  renderByShareCode,
+  createRenderByShareCodeJob,
   type RenderAPIService,
   type RenderBuildResponse,
   type RenderSpriteResponse,

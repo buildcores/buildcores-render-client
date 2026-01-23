@@ -1,4 +1,15 @@
-import { RenderBuildRequest, AvailablePartsResponse, ApiConfig, PartCategory, GetAvailablePartsOptions } from "./types";
+import { 
+  RenderBuildRequest, 
+  AvailablePartsResponse, 
+  ApiConfig, 
+  PartCategory, 
+  GetAvailablePartsOptions,
+  BuildResponse,
+  PartsResponse,
+  RenderByShareCodeOptions,
+  RenderByShareCodeJobResponse,
+  RenderByShareCodeResponse,
+} from "./types";
 
 // API Configuration
 const API_BASE_URL = "https://www.renderapi.buildcores.com";
@@ -8,6 +19,9 @@ export const API_ENDPOINTS = {
   RENDER_BUILD_EXPERIMENTAL: "/render-build-experimental",
   RENDER_BUILD: "/render-build",
   AVAILABLE_PARTS: "/available-parts",
+  BUILD: "/build",
+  PARTS: "/parts",
+  RENDER_BY_SHARE_CODE: "/render-by-share-code",
 } as const;
 
 // API Response Types
@@ -170,6 +184,10 @@ export const createRenderBuildJob = async (
     ...(request.height !== undefined ? { height: request.height } : {}),
     // Include profile if provided
     ...(request.profile ? { profile: request.profile } : {}),
+    // Include composition settings
+    ...(request.showGrid !== undefined ? { showGrid: request.showGrid } : {}),
+    ...(request.cameraOffsetX !== undefined ? { cameraOffsetX: request.cameraOffsetX } : {}),
+    ...(request.gridSettings ? { gridSettings: request.gridSettings } : {}),
   };
 
   const response = await fetch(buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config), {
@@ -314,6 +332,215 @@ export const getAvailableParts = async (
   }
 
   return (await response.json()) as AvailablePartsResponse;
+};
+
+// ============================================
+// Build and Parts API Functions
+// ============================================
+
+/**
+ * Fetch a build by its share code.
+ * Returns build metadata and parts organized by category.
+ *
+ * @param shareCode - The share code of the build to fetch
+ * @param config - API configuration (environment, auth token)
+ * @returns Promise with build details including parts
+ *
+ * @example
+ * ```tsx
+ * const build = await getBuildByShareCode('abc123xyz', {
+ *   environment: 'prod',
+ *   authToken: 'your-api-key'
+ * });
+ *
+ * console.log(build.name); // "My Gaming PC"
+ * console.log(build.parts.CPU); // ["7xjqsomhr"]
+ *
+ * // Use the parts directly with BuildRender
+ * <BuildRender parts={{ parts: build.parts }} size={500} apiConfig={config} />
+ * ```
+ */
+export const getBuildByShareCode = async (
+  shareCode: string,
+  config: ApiConfig
+): Promise<BuildResponse> => {
+  const url = buildApiUrl(`${API_ENDPOINTS.BUILD}/${encodeURIComponent(shareCode)}`, config);
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: buildHeaders(config),
+  });
+
+  if (response.status === 404) {
+    throw new Error("Build not found");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Get build by share code failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  return (await response.json()) as BuildResponse;
+};
+
+/**
+ * Fetch part details by their BuildCores IDs.
+ *
+ * @param partIds - Array of BuildCores part IDs to fetch
+ * @param config - API configuration (environment, auth token)
+ * @returns Promise with part details
+ *
+ * @example
+ * ```tsx
+ * const response = await getPartsByIds(['7xjqsomhr', 'z7pyphm9k'], {
+ *   environment: 'prod',
+ *   authToken: 'your-api-key'
+ * });
+ *
+ * response.parts.forEach(part => {
+ *   console.log(`${part.name} (${part.category})`);
+ * });
+ * ```
+ */
+export const getPartsByIds = async (
+  partIds: string[],
+  config: ApiConfig
+): Promise<PartsResponse> => {
+  const url = buildApiUrl(API_ENDPOINTS.PARTS, config);
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: buildHeaders(config),
+    body: JSON.stringify({ ids: partIds }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Get parts by IDs failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  return (await response.json()) as PartsResponse;
+};
+
+/**
+ * Create a render job for a build by its share code.
+ * Returns the job ID for polling status.
+ *
+ * @param shareCode - The share code of the build to render
+ * @param config - API configuration (environment, auth token)
+ * @param options - Render options (format, dimensions, profile)
+ * @returns Promise with job creation response
+ */
+export const createRenderByShareCodeJob = async (
+  shareCode: string,
+  config: ApiConfig,
+  options?: Omit<RenderByShareCodeOptions, "pollIntervalMs" | "timeoutMs">
+): Promise<RenderByShareCodeJobResponse> => {
+  const url = buildApiUrl(API_ENDPOINTS.RENDER_BY_SHARE_CODE, config);
+
+  const body = {
+    shareCode,
+    ...(options?.format ? { format: options.format } : {}),
+    ...(options?.width !== undefined ? { width: options.width } : {}),
+    ...(options?.height !== undefined ? { height: options.height } : {}),
+    ...(options?.profile ? { profile: options.profile } : {}),
+    ...(options?.showGrid !== undefined ? { showGrid: options.showGrid } : {}),
+    ...(options?.cameraOffsetX !== undefined ? { cameraOffsetX: options.cameraOffsetX } : {}),
+    ...(options?.gridSettings ? { gridSettings: options.gridSettings } : {}),
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: buildHeaders(config),
+    body: JSON.stringify(body),
+  });
+
+  if (response.status === 404) {
+    throw new Error("Build not found");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Create render job failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data = (await response.json()) as RenderByShareCodeJobResponse;
+  if (!data?.job_id) {
+    throw new Error("Create render job failed: missing job_id in response");
+  }
+
+  return data;
+};
+
+/**
+ * Render a build by its share code.
+ * This is a convenience function that creates a render job and polls until completion.
+ *
+ * @param shareCode - The share code of the build to render
+ * @param config - API configuration (environment, auth token)
+ * @param options - Render options including polling configuration
+ * @returns Promise with the final render URL
+ *
+ * @example
+ * ```tsx
+ * // Simple usage - just pass share code
+ * const result = await renderByShareCode('abc123xyz', {
+ *   environment: 'prod',
+ *   authToken: 'your-api-key'
+ * });
+ * console.log(result.videoUrl); // URL to rendered video
+ *
+ * // With custom options
+ * const result = await renderByShareCode('abc123xyz', config, {
+ *   format: 'sprite',
+ *   width: 1920,
+ *   height: 1080,
+ *   profile: 'cinematic',
+ *   timeoutMs: 180000 // 3 minute timeout
+ * });
+ * ```
+ */
+export const renderByShareCode = async (
+  shareCode: string,
+  config: ApiConfig,
+  options?: RenderByShareCodeOptions
+): Promise<RenderByShareCodeResponse> => {
+  const pollIntervalMs = options?.pollIntervalMs ?? 1500;
+  const timeoutMs = options?.timeoutMs ?? 120_000; // 2 minutes default
+
+  const { job_id } = await createRenderByShareCodeJob(shareCode, config, options);
+
+  const start = Date.now();
+  // Poll until completed or error or timeout
+  for (;;) {
+    const status = await getRenderBuildStatus(job_id, config);
+    
+    if (status.status === "completed") {
+      const requestedFormat = options?.format ?? "video";
+      const finalUrl =
+        requestedFormat === "sprite"
+          ? status.sprite_url || status.url || undefined
+          : status.video_url || status.url || undefined;
+      
+      if (!finalUrl) {
+        throw new Error("Render job completed but no URL returned");
+      }
+      return { videoUrl: finalUrl };
+    }
+    
+    if (status.status === "error") {
+      throw new Error(status.error || "Render job failed");
+    }
+
+    if (Date.now() - start > timeoutMs) {
+      throw new Error("Timed out waiting for render job to complete");
+    }
+
+    await sleep(pollIntervalMs);
+  }
 };
 
 // Export the base URL for external use

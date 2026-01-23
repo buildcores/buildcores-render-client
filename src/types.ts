@@ -134,6 +134,9 @@ export interface BuildRenderProps {
    * This object defines which PC components should be included in the 3D sprite render.
    * Each part category contains an array with a single part ID that will be rendered.
    *
+   * **Note**: If `shareCode` is provided, it will be used instead of `parts`.
+   * Using `shareCode` preserves the build's interactive state (including case fan slot placements).
+   *
    * **Current Limitation**: Only 1 part per category is supported. Arrays must contain
    * exactly one part ID per category. Future versions will support multiple parts per category.
    *
@@ -155,7 +158,27 @@ export interface BuildRenderProps {
    * <SpriteRender parts={parts} size={300} />
    * ```
    */
-  parts: RenderBuildRequest;
+  parts?: RenderBuildRequest;
+
+  /**
+   * Share code of an existing build to render.
+   *
+   * When provided, the build will be rendered using its existing interactive state,
+   * which includes case fan slot placements. This is preferred over `parts` when
+   * rendering builds that have already been configured with case fans.
+   *
+   * If both `shareCode` and `parts` are provided, `shareCode` takes precedence.
+   *
+   * @example
+   * ```tsx
+   * <BuildRender
+   *   shareCode="abc123xyz"
+   *   size={500}
+   *   apiConfig={{ environment: 'prod', authToken: 'your-token' }}
+   * />
+   * ```
+   */
+  shareCode?: string;
 
   /**
    * Width and height in pixels. If only `size` is provided, both width and height use it.
@@ -210,6 +233,25 @@ export interface BuildRenderProps {
    * @default 0.2
    */
   touchSensitivity?: number;
+
+  /**
+   * Show grid in render.
+   * Works for both parts and shareCode rendering.
+   */
+  showGrid?: boolean;
+
+  /**
+   * Camera offset X for composition.
+   * Positive values shift the build to the right, leaving room for text overlay on the left.
+   * Works for both parts and shareCode rendering.
+   */
+  cameraOffsetX?: number;
+
+  /**
+   * Grid appearance settings for thicker/more visible grid in renders.
+   * Works for both parts and shareCode rendering.
+   */
+  gridSettings?: GridSettings;
 }
 
 // API Types
@@ -285,6 +327,8 @@ export enum PartCategory {
   PCCase = "PCCase",
   /** CPU Cooler - Air or liquid cooling for the processor */
   CPUCooler = "CPUCooler",
+  /** Case Fans - Additional cooling fans for the case */
+  CaseFan = "CaseFan",
 }
 
 /**
@@ -410,6 +454,25 @@ export interface RenderBuildRequest {
    * ```
    */
   profile?: 'cinematic' | 'flat' | 'fast';
+
+  /**
+   * Whether to show the 3D grid in the render.
+   * Defaults to true for cinematic profile, false otherwise.
+   */
+  showGrid?: boolean;
+
+  /**
+   * Horizontal offset for the camera view.
+   * Positive values shift the build to the right, leaving room for text overlay on the left.
+   * Range: -0.3 to 0.3
+   */
+  cameraOffsetX?: number;
+
+  /**
+   * Custom grid appearance settings.
+   * Only applies when showGrid is true.
+   */
+  gridSettings?: GridSettings;
 }
 
 /**
@@ -510,4 +573,139 @@ export interface GetAvailablePartsOptions {
   limit?: number;
   /** Number of parts to skip for pagination (default 0) */
   skip?: number;
+}
+
+// ============================================
+// Build and Parts API Types
+// ============================================
+
+/**
+ * Extended part details including category information
+ */
+export interface PartDetailsWithCategory {
+  /** Unique part identifier (BuildCores ID) */
+  id: string;
+  /** Human-readable part name */
+  name: string;
+  /** URL to part image (may be null) */
+  image: string | null;
+  /** Part category */
+  category: PartCategory;
+}
+
+/**
+ * Response from the get build by share code endpoint.
+ * Contains build metadata and parts organized by category.
+ *
+ * @example
+ * ```tsx
+ * const build = await getBuildByShareCode('abc123xyz', config);
+ * console.log(build.name); // "My Gaming PC"
+ * console.log(build.parts.CPU); // ["7xjqsomhr"]
+ * console.log(build.partDetails.CPU[0].name); // "AMD Ryzen 7 9800X3D"
+ * ```
+ */
+export interface BuildResponse {
+  /** The share code of the build */
+  shareCode: string;
+  /** Build name/title */
+  name: string;
+  /** Build description */
+  description: string;
+  /**
+   * Part IDs mapped by category.
+   * Use these IDs directly with RenderBuildRequest.
+   */
+  parts: {
+    [K in PartCategory]?: string[];
+  };
+  /**
+   * Detailed part information mapped by category.
+   * Includes name, image URL, and category for each part.
+   */
+  partDetails: {
+    [K in PartCategory]?: PartDetailsWithCategory[];
+  };
+}
+
+/**
+ * Response from the get parts by IDs endpoint.
+ *
+ * @example
+ * ```tsx
+ * const response = await getPartsByIds(['7xjqsomhr', 'z7pyphm9k'], config);
+ * response.parts.forEach(part => {
+ *   console.log(`${part.name} (${part.category})`);
+ * });
+ * ```
+ */
+export interface PartsResponse {
+  /** Array of part details */
+  parts: PartDetailsWithCategory[];
+}
+
+/**
+ * Grid appearance settings for renders
+ */
+export interface GridSettings {
+  /** Grid cell line thickness (default: 0.6) */
+  cellThickness?: number;
+  /** Grid section line thickness (default: 1.2) */
+  sectionThickness?: number;
+  /** Grid color as hex string (default: #6f6f6f) */
+  color?: string;
+  /** Distance at which grid starts to fade (default: 3) */
+  fadeDistance?: number;
+  /** Render order for depth sorting (default: 0, use -1 to render before other objects) */
+  renderOrder?: number;
+}
+
+/**
+ * Options for rendering a build by share code
+ */
+export interface RenderByShareCodeOptions {
+  /** Output format - video (MP4) or sprite (WebP sprite sheet) */
+  format?: "video" | "sprite";
+  /** Desired canvas pixel width (256-8192) */
+  width?: number;
+  /** Desired canvas pixel height (256-8192) */
+  height?: number;
+  /** Render quality profile */
+  profile?: "cinematic" | "flat" | "fast";
+  /** Show grid in render (default: true for cinematic profile) */
+  showGrid?: boolean;
+  /** Camera offset X for composition (positive = shift build right to leave room for text overlay) */
+  cameraOffsetX?: number;
+  /** Grid appearance settings (for thicker/more visible grid in renders) */
+  gridSettings?: GridSettings;
+  /** Polling interval in milliseconds (default: 1500) */
+  pollIntervalMs?: number;
+  /** Timeout in milliseconds (default: 120000 = 2 minutes) */
+  timeoutMs?: number;
+}
+
+/**
+ * Response from the render by share code endpoint (job creation).
+ */
+export interface RenderByShareCodeJobResponse {
+  /** Unique job identifier for polling status */
+  job_id: string;
+  /** Current job status */
+  status: "queued" | "processing" | "completed" | "error";
+  /** The share code of the build being rendered */
+  share_code: string;
+}
+
+/**
+ * Final response after render by share code completes.
+ *
+ * @example
+ * ```tsx
+ * const result = await renderByShareCode('abc123xyz', config);
+ * // Use result.videoUrl to display the rendered video
+ * ```
+ */
+export interface RenderByShareCodeResponse {
+  /** URL to the rendered video or sprite sheet */
+  videoUrl: string;
 }

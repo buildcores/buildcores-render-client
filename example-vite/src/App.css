@@ -32,6 +32,47 @@
   font-size: 1.1rem;
 }
 
+/* Mode Selector Tabs */
+.mode-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #d0d0d0;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 14px 20px;
+  background: #f5f5f5;
+  border: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.mode-tab:not(:last-child) {
+  border-right: 1px solid #d0d0d0;
+}
+
+.mode-tab:hover:not(.active) {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.mode-tab.active {
+  background: #0066cc;
+  color: white;
+}
+
+.mode-tab.active:hover {
+  background: #0052a3;
+}
+
 /* Resolution Controls */
 .resolution-controls {
   background: #fafafa;
@@ -297,6 +338,172 @@
 
 .instructions .quality-info strong {
   text-transform: capitalize;
+}
+
+.instructions .composition-info {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.instructions .composition-info strong {
+  text-transform: capitalize;
+}
+
+/* Composition Controls */
+.composition-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.composition-row {
+  display: flex;
+  align-items: center;
+}
+
+.offset-hint {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.offset-presets {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.offset-presets button {
+  flex: 1;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.offset-presets button:hover {
+  background: #f5f5f5;
+  border-color: #0066cc;
+  color: #0066cc;
+}
+
+.offset-presets button.active {
+  background: #0066cc;
+  border-color: #0066cc;
+  color: white;
+}
+
+.offset-presets button:active {
+  background: #0052a3;
+}
+
+/* Grid Settings */
+.grid-settings {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed #d0d0d0;
+}
+
+.grid-settings-header {
+  margin-bottom: 12px;
+}
+
+.toggle-switch.small .toggle-slider {
+  width: 40px;
+  height: 22px;
+}
+
+.toggle-switch.small .toggle-slider:before {
+  height: 16px;
+  width: 16px;
+}
+
+.toggle-switch.small input:checked + .toggle-slider:before {
+  transform: translateX(18px);
+}
+
+.grid-controls {
+  background: #f5f5f5;
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.slider-group.compact {
+  margin-bottom: 0;
+}
+
+.slider-group.compact label {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.inline-controls {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.color-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.color-picker input[type="color"] {
+  width: 36px;
+  height: 26px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+
+.color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.color-picker input[type="color"]::-webkit-color-swatch {
+  border-radius: 2px;
+  border: none;
+}
+
+.render-order-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+}
+
+.render-order-select select {
+  padding: 4px 8px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.render-order-select select:hover {
+  border-color: #0066cc;
 }
 
 /* Quality Select Container */
