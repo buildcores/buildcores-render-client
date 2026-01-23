@@ -37,7 +37,7 @@ function App() {
   // Resolution controls
   const [width, setWidth] = useState(1920);
   const [height, setHeight] = useState(1080);
-  const [useCustomResolution, setUseCustomResolution] = useState(false);
+  const [useCustomResolution, setUseCustomResolution] = useState(true);
   
   // Quality profile control
   const [profile, setProfile] = useState('cinematic');
@@ -57,7 +57,7 @@ function App() {
   // Track applied resolution (what's currently rendered)
   const [appliedWidth, setAppliedWidth] = useState(1920);
   const [appliedHeight, setAppliedHeight] = useState(1080);
-  const [appliedCustomResolution, setAppliedCustomResolution] = useState(false);
+  const [appliedCustomResolution, setAppliedCustomResolution] = useState(true);
   const [appliedProfile, setAppliedProfile] = useState('cinematic');
   const [appliedShowGrid, setAppliedShowGrid] = useState(true);
   const [appliedCameraOffsetX, setAppliedCameraOffsetX] = useState(0);

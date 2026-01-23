@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { RenderBuildRequest, ApiConfig } from "../types";
-import { renderSpriteExperimental, renderBuild, renderByShareCode } from "../api";
+import { renderSpriteExperimental, renderBuild } from "../api";
 import { arePartsEqual } from "./useBuildRender";
 
 export interface UseSpriteRenderReturn {
@@ -23,39 +23,8 @@ export interface UseSpriteRenderOptions {
   mode?: "async" | "experimental";
 }
 
-/**
- * Grid settings for render composition
- */
-export interface RenderGridSettings {
-  cellThickness?: number;
-  sectionThickness?: number;
-  color?: string;
-  fadeDistance?: number;
-  renderOrder?: number;
-}
-
-/**
- * Input for sprite rendering - either parts (creates new build) or shareCode (uses existing build)
- */
-export type SpriteRenderInput = 
-  | { 
-      type: 'parts'; 
-      parts: RenderBuildRequest;
-      showGrid?: boolean;
-      cameraOffsetX?: number;
-      gridSettings?: RenderGridSettings;
-    }
-  | { 
-      type: 'shareCode'; 
-      shareCode: string; 
-      profile?: 'cinematic' | 'flat' | 'fast';
-      showGrid?: boolean;
-      cameraOffsetX?: number;
-      gridSettings?: RenderGridSettings;
-    };
-
 export const useSpriteRender = (
-  input: RenderBuildRequest | SpriteRenderInput,
+  parts: RenderBuildRequest,
   apiConfig: ApiConfig,
   onLoadStart?: () => void,
   options?: UseSpriteRenderOptions
@@ -68,55 +37,19 @@ export const useSpriteRender = (
     rows: number;
     totalFrames: number;
   } | null>(null);
-  const previousInputRef = useRef<RenderBuildRequest | SpriteRenderInput | null>(null);
-
-  // Normalize input to SpriteRenderInput format
-  const normalizedInput: SpriteRenderInput = 
-    'type' in input ? input : { type: 'parts', parts: input };
+  const previousPartsRef = useRef<RenderBuildRequest | null>(null);
 
   const fetchRenderSprite = useCallback(
-    async (currentInput: SpriteRenderInput) => {
+    async (currentParts: RenderBuildRequest) => {
       try {
         setIsRenderingSprite(true);
         setRenderError(null);
         onLoadStart?.();
 
-        // Handle share code rendering - uses existing build with proper interactive state
-        if (currentInput.type === 'shareCode') {
-          const { videoUrl: spriteUrl } = await renderByShareCode(
-            currentInput.shareCode,
-            apiConfig,
-            { 
-              format: 'sprite', 
-              profile: currentInput.profile,
-              showGrid: currentInput.showGrid,
-              cameraOffsetX: currentInput.cameraOffsetX,
-              gridSettings: currentInput.gridSettings
-            }
-          );
-
-          setSpriteSrc((prevSrc) => {
-            if (prevSrc && prevSrc.startsWith("blob:")) {
-              URL.revokeObjectURL(prevSrc);
-            }
-            return spriteUrl;
-          });
-
-          setSpriteMetadata({ cols: 12, rows: 6, totalFrames: 72 });
-          return;
-        }
-
-        // Handle parts-based rendering (creates new build)
-        const currentParts = currentInput.parts;
         const mode = options?.mode ?? "async";
         if (mode === "experimental") {
           const response = await renderSpriteExperimental(
-            {
-              ...currentParts,
-              showGrid: currentInput.showGrid,
-              cameraOffsetX: currentInput.cameraOffsetX,
-              gridSettings: currentInput.gridSettings,
-            },
+            currentParts,
             apiConfig
           );
           const objectUrl = URL.createObjectURL(response.sprite);
@@ -138,13 +71,7 @@ export const useSpriteRender = (
         } else {
           // Async job-based flow: request sprite format and use returned URL
           const { videoUrl: spriteUrl } = await renderBuild(
-            { 
-              ...currentParts, 
-              format: "sprite",
-              showGrid: currentInput.showGrid,
-              cameraOffsetX: currentInput.cameraOffsetX,
-              gridSettings: currentInput.gridSettings,
-            },
+            { ...currentParts, format: "sprite" },
             apiConfig
           );
 
@@ -169,41 +96,17 @@ export const useSpriteRender = (
     [apiConfig, onLoadStart, options?.mode]
   );
 
-  // Check if inputs are equal
-  const areInputsEqual = (a: SpriteRenderInput | null, b: SpriteRenderInput): boolean => {
-    if (!a) return false;
-    if (a.type !== b.type) return false;
-    if (a.type === 'shareCode' && b.type === 'shareCode') {
-      // Compare grid settings (shallow comparison of properties)
-      const gridSettingsEqual = 
-        JSON.stringify(a.gridSettings ?? {}) === JSON.stringify(b.gridSettings ?? {});
-      return a.shareCode === b.shareCode && 
-             a.profile === b.profile &&
-             a.showGrid === b.showGrid &&
-             a.cameraOffsetX === b.cameraOffsetX &&
-             gridSettingsEqual;
-    }
-    if (a.type === 'parts' && b.type === 'parts') {
-      // Compare grid settings (shallow comparison of properties)
-      const gridSettingsEqual = 
-        JSON.stringify(a.gridSettings ?? {}) === JSON.stringify(b.gridSettings ?? {});
-      return arePartsEqual(a.parts, b.parts) &&
-             a.showGrid === b.showGrid &&
-             a.cameraOffsetX === b.cameraOffsetX &&
-             gridSettingsEqual;
-    }
-    return false;
-  };
-
-  // Effect to call API when input changes
+  // Effect to call API when parts content changes (using custom equality check)
   useEffect(() => {
-    const shouldFetch = !areInputsEqual(previousInputRef.current as SpriteRenderInput | null, normalizedInput);
+    const shouldFetch =
+      previousPartsRef.current === null ||
+      !arePartsEqual(previousPartsRef.current, parts);
 
     if (shouldFetch) {
-      previousInputRef.current = normalizedInput;
-      fetchRenderSprite(normalizedInput);
+      previousPartsRef.current = parts;
+      fetchRenderSprite(parts);
     }
-  }, [normalizedInput, fetchRenderSprite]);
+  }, [parts, fetchRenderSprite]);
 
   // Cleanup effect for component unmount
   useEffect(() => {
