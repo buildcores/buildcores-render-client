@@ -667,4 +667,83 @@
   }
 }
 
+/* Showcase Mode Styles */
+.showcase-description {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+  border: 1px solid #c8dff7;
+  border-radius: 12px;
+  padding: 20px 25px;
+  margin-bottom: 20px;
+}
+
+.showcase-description h3 {
+  color: #0066cc;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.showcase-description p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.showcase-demo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.showcase-link-wrapper {
+  position: relative;
+  display: block;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+.showcase-link-wrapper:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 30px rgba(0, 102, 204, 0.25);
+}
+
+.click-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: white;
+  padding: 20px 15px 15px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.code-example {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.code-example h4 {
+  color: #9cdcfe;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.code-example pre {
+  color: #d4d4d4;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre-wrap;
+}
 

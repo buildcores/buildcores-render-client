@@ -44,6 +44,7 @@ export type SpriteRenderInput =
       showGrid?: boolean;
       cameraOffsetX?: number;
       gridSettings?: RenderGridSettings;
+      frameQuality?: 'standard' | 'high';
     }
   | { 
       type: 'shareCode'; 
@@ -52,6 +53,7 @@ export type SpriteRenderInput =
       showGrid?: boolean;
       cameraOffsetX?: number;
       gridSettings?: RenderGridSettings;
+      frameQuality?: 'standard' | 'high';
     };
 
 export const useSpriteRender = (
@@ -91,9 +93,15 @@ export const useSpriteRender = (
               profile: currentInput.profile,
               showGrid: currentInput.showGrid,
               cameraOffsetX: currentInput.cameraOffsetX,
-              gridSettings: currentInput.gridSettings
+              gridSettings: currentInput.gridSettings,
+              frameQuality: currentInput.frameQuality
             }
           );
+
+          // Set metadata BEFORE sprite URL to avoid race condition
+          // (image load starts immediately when spriteSrc changes)
+          const rows = currentInput.frameQuality === 'high' ? 12 : 6;
+          setSpriteMetadata({ cols: 12, rows, totalFrames: 12 * rows });
 
           setSpriteSrc((prevSrc) => {
             if (prevSrc && prevSrc.startsWith("blob:")) {
@@ -101,14 +109,15 @@ export const useSpriteRender = (
             }
             return spriteUrl;
           });
-
-          setSpriteMetadata({ cols: 12, rows: 6, totalFrames: 72 });
           return;
         }
 
         // Handle parts-based rendering (creates new build)
         const currentParts = currentInput.parts;
         const mode = options?.mode ?? "async";
+        const frameQuality = currentInput.frameQuality;
+        const rows = frameQuality === 'high' ? 12 : 6;
+        
         if (mode === "experimental") {
           const response = await renderSpriteExperimental(
             {
@@ -116,10 +125,18 @@ export const useSpriteRender = (
               showGrid: currentInput.showGrid,
               cameraOffsetX: currentInput.cameraOffsetX,
               gridSettings: currentInput.gridSettings,
+              frameQuality,
             },
             apiConfig
           );
           const objectUrl = URL.createObjectURL(response.sprite);
+
+          // Set sprite metadata BEFORE sprite URL to avoid race condition
+          setSpriteMetadata({
+            cols: response.metadata?.cols || 12,
+            rows: response.metadata?.rows || rows,
+            totalFrames: response.metadata?.totalFrames || 12 * rows,
+          });
 
           // Clean up previous sprite URL before setting new one
           setSpriteSrc((prevSrc) => {
@@ -127,13 +144,6 @@ export const useSpriteRender = (
               URL.revokeObjectURL(prevSrc);
             }
             return objectUrl;
-          });
-
-          // Set sprite metadata
-          setSpriteMetadata({
-            cols: response.metadata?.cols || 12,
-            rows: response.metadata?.rows || 6,
-            totalFrames: response.metadata?.totalFrames || 72,
           });
         } else {
           // Async job-based flow: request sprite format and use returned URL
@@ -144,9 +154,13 @@ export const useSpriteRender = (
               showGrid: currentInput.showGrid,
               cameraOffsetX: currentInput.cameraOffsetX,
               gridSettings: currentInput.gridSettings,
+              frameQuality,
             },
             apiConfig
           );
+
+          // Set metadata BEFORE sprite URL to avoid race condition
+          setSpriteMetadata({ cols: 12, rows, totalFrames: 12 * rows });
 
           setSpriteSrc((prevSrc) => {
             if (prevSrc && prevSrc.startsWith("blob:")) {
@@ -154,9 +168,6 @@ export const useSpriteRender = (
             }
             return spriteUrl;
           });
-
-          // No metadata from async endpoint; keep defaults
-          setSpriteMetadata({ cols: 12, rows: 6, totalFrames: 72 });
         }
       } catch (error) {
         setRenderError(
@@ -181,6 +192,7 @@ export const useSpriteRender = (
              a.profile === b.profile &&
              a.showGrid === b.showGrid &&
              a.cameraOffsetX === b.cameraOffsetX &&
+             a.frameQuality === b.frameQuality &&
              gridSettingsEqual;
     }
     if (a.type === 'parts' && b.type === 'parts') {
@@ -190,6 +202,7 @@ export const useSpriteRender = (
       return arePartsEqual(a.parts, b.parts) &&
              a.showGrid === b.showGrid &&
              a.cameraOffsetX === b.cameraOffsetX &&
+             a.frameQuality === b.frameQuality &&
              gridSettingsEqual;
     }
     return false;

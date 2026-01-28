@@ -7,7 +7,7 @@ import './App.css';
 // 🔐 ADD YOUR API CREDENTIALS HERE
 // ===========================================
 const API_CONFIG = {
-  environment: 'staging',  // or 'prod'
+  environment: 'prod',
   authToken: 'test-token'  // Replace with your actual token
 };
 // ===========================================
@@ -27,7 +27,8 @@ const buildSpecs = [
 // Demo modes
 const DEMO_MODES = {
   MANUAL: 'manual',
-  SHARE_CODE: 'share_code'
+  SHARE_CODE: 'share_code',
+  SHOWCASE: 'showcase'
 };
 
 function App() {
@@ -71,6 +72,15 @@ function App() {
   const [appliedUseCustomGridSettings, setAppliedUseCustomGridSettings] = useState(true);
   const [renderKey, setRenderKey] = useState(0); // Force re-render by changing key
 
+  // Showcase mode settings
+  const [showcaseSpinDuration, setShowcaseSpinDuration] = useState(5000);
+  const [showcaseInteractive, setShowcaseInteractive] = useState(false);
+  const [showcaseAnimationMode, setShowcaseAnimationMode] = useState('spin360');
+
+  // Frame quality for smoother animation (default to 'high' for showcase mode)
+  const [frameQuality, setFrameQuality] = useState('high');
+  const [appliedFrameQuality, setAppliedFrameQuality] = useState('high');
+
   // Build current grid settings object
   const currentGridSettings = useCustomGridSettings ? {
     cellThickness: gridCellThickness,
@@ -87,7 +97,8 @@ function App() {
                      showGrid !== appliedShowGrid ||
                      cameraOffsetX !== appliedCameraOffsetX ||
                      useCustomGridSettings !== appliedUseCustomGridSettings ||
-                     (useCustomGridSettings && JSON.stringify(currentGridSettings) !== JSON.stringify(appliedGridSettings));
+                     (useCustomGridSettings && JSON.stringify(currentGridSettings) !== JSON.stringify(appliedGridSettings)) ||
+                     frameQuality !== appliedFrameQuality;
 
   // Apply new resolution and trigger re-render
   const handleRerender = () => {
@@ -99,6 +110,7 @@ function App() {
     setAppliedCameraOffsetX(cameraOffsetX);
     setAppliedUseCustomGridSettings(useCustomGridSettings);
     setAppliedGridSettings(currentGridSettings);
+    setAppliedFrameQuality(frameQuality);
     setRenderKey(prev => prev + 1); // Increment to force re-render
   };
 
@@ -188,11 +200,165 @@ function App() {
           >
             Load by Share Code
           </button>
+          <button 
+            className={`mode-tab ${demoMode === DEMO_MODES.SHOWCASE ? 'active' : ''}`}
+            onClick={() => setDemoMode(DEMO_MODES.SHOWCASE)}
+          >
+            Showcase Mode
+          </button>
         </div>
 
         {/* Share Code Mode - BuildViewer */}
         {demoMode === DEMO_MODES.SHARE_CODE && (
           <BuildViewer apiConfig={API_CONFIG} />
+        )}
+
+        {/* Showcase Mode - Non-interactive 360 spin */}
+        {demoMode === DEMO_MODES.SHOWCASE && (
+          <>
+            <div className="resolution-controls">
+              <div className="control-header">
+                <h3>Animation Settings</h3>
+              </div>
+              
+              <div className="composition-controls">
+                {/* Animation Mode */}
+                <div className="slider-group">
+                  <label>Animation Mode:</label>
+                  <div className="preset-buttons">
+                    <button 
+                      onClick={() => setShowcaseAnimationMode('spin360')} 
+                      className={showcaseAnimationMode === 'spin360' ? 'active' : ''}
+                    >
+                      360° Spin
+                    </button>
+                    <button 
+                      onClick={() => setShowcaseAnimationMode('bounce')} 
+                      className={showcaseAnimationMode === 'bounce' ? 'active' : ''}
+                    >
+                      Bounce
+                    </button>
+                  </div>
+                </div>
+
+                {/* Spin Duration (only for spin360) */}
+                {showcaseAnimationMode === 'spin360' && (
+                  <div className="slider-group">
+                    <label>
+                      Spin Duration: <span className="value">{(showcaseSpinDuration / 1000).toFixed(1)}s</span> per rotation
+                    </label>
+                    <input
+                      type="range"
+                      min="3000"
+                      max="15000"
+                      step="1000"
+                      value={showcaseSpinDuration}
+                      onChange={(e) => setShowcaseSpinDuration(parseInt(e.target.value))}
+                      className="slider"
+                    />
+                    <div className="preset-buttons">
+                      <button onClick={() => setShowcaseSpinDuration(5000)}>5s (Fast)</button>
+                      <button onClick={() => setShowcaseSpinDuration(10000)}>10s (Normal)</button>
+                      <button onClick={() => setShowcaseSpinDuration(15000)}>15s (Slow)</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Interactive Toggle */}
+                <div className="composition-row">
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={showcaseInteractive}
+                      onChange={(e) => setShowcaseInteractive(e.target.checked)}
+                    />
+                    <span className="toggle-slider"></span>
+                    <span className="toggle-label">
+                      {showcaseInteractive ? 'Interactive (drag to rotate)' : 'Non-interactive (click passes through)'}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Frame Quality */}
+                <div className="slider-group">
+                  <label>Frame Quality:</label>
+                  <div className="preset-buttons">
+                    <button 
+                      onClick={() => setFrameQuality('standard')} 
+                      className={frameQuality === 'standard' ? 'active' : ''}
+                    >
+                      Standard (72)
+                    </button>
+                    <button 
+                      onClick={() => setFrameQuality('high')} 
+                      className={frameQuality === 'high' ? 'active' : ''}
+                    >
+                      High (144)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="demo-section">
+              <div className="showcase-demo-container">
+                {/* Simulated link wrapper to show click-through */}
+                <a 
+                  href="https://buildcores.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="showcase-link-wrapper"
+                  onClick={(e) => {
+                    if (!showcaseInteractive) {
+                      // Allow the click to go through
+                    } else {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  <BuildRender
+                    parts={parts}
+                    size={400}
+                    apiConfig={API_CONFIG}
+                    animationMode={showcaseAnimationMode}
+                    spinDuration={showcaseSpinDuration}
+                    interactive={showcaseInteractive}
+                    showGrid={true}
+                    frameQuality={frameQuality}
+                  />
+                  {!showcaseInteractive && (
+                    <div className="click-hint">Click to visit BuildCores.com</div>
+                  )}
+                </a>
+              </div>
+
+              <div className="instructions">
+                <p>
+                  <strong>Mode:</strong> {showcaseAnimationMode === 'spin360' ? 'Continuous 360° spin' : 'Bounce animation'}
+                </p>
+                {showcaseAnimationMode === 'spin360' && (
+                  <p><strong>Speed:</strong> {showcaseSpinDuration / 1000} seconds per rotation</p>
+                )}
+                <p>
+                  <strong>Interaction:</strong> {showcaseInteractive ? 'Enabled (drag to rotate, scroll to zoom)' : 'Disabled (clicks pass through to link)'}
+                </p>
+              </div>
+
+              <div className="code-example">
+                <h4>Code Example</h4>
+                <pre>{`<a href="https://buildcores.com">
+  <BuildRender
+    shareCode="your-share-code"
+    size={400}
+    apiConfig={config}
+    animationMode="${showcaseAnimationMode}"${showcaseAnimationMode === 'spin360' ? `
+    spinDuration={${showcaseSpinDuration}}` : ''}
+    interactive={${showcaseInteractive}}
+  />
+</a>`}</pre>
+              </div>
+            </div>
+          </>
         )}
 
         {/* Manual Config Mode */}
@@ -273,6 +439,18 @@ function App() {
               <option value="cinematic">Cinematic - All effects (shadows, AO, bloom)</option>
               <option value="flat">Flat - No effects, clean product shots</option>
               <option value="fast">Fast - Minimal rendering, fastest speed</option>
+            </select>
+          </div>
+
+          <div className="quality-select-container" style={{ marginTop: '12px' }}>
+            <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Frame Quality</label>
+            <select 
+              value={frameQuality} 
+              onChange={(e) => setFrameQuality(e.target.value)}
+              className="quality-select"
+            >
+              <option value="standard">Standard - 72 frames (faster, smaller file)</option>
+              <option value="high">High - 144 frames (smoother animation)</option>
             </select>
           </div>
         </div>
@@ -450,6 +628,7 @@ function App() {
               showGrid={appliedShowGrid}
               cameraOffsetX={appliedCameraOffsetX}
               gridSettings={appliedGridSettingsObj}
+              frameQuality={appliedFrameQuality}
             />
           </div>
 

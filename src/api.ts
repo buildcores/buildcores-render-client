@@ -188,6 +188,8 @@ export const createRenderBuildJob = async (
     ...(request.showGrid !== undefined ? { showGrid: request.showGrid } : {}),
     ...(request.cameraOffsetX !== undefined ? { cameraOffsetX: request.cameraOffsetX } : {}),
     ...(request.gridSettings ? { gridSettings: request.gridSettings } : {}),
+    // Include frame quality for sprite rendering
+    ...(request.frameQuality ? { frameQuality: request.frameQuality } : {}),
   };
 
   const response = await fetch(buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config), {
@@ -449,6 +451,7 @@ export const createRenderByShareCodeJob = async (
     ...(options?.showGrid !== undefined ? { showGrid: options.showGrid } : {}),
     ...(options?.cameraOffsetX !== undefined ? { cameraOffsetX: options.cameraOffsetX } : {}),
     ...(options?.gridSettings ? { gridSettings: options.gridSettings } : {}),
+    ...(options?.frameQuality ? { frameQuality: options.frameQuality } : {}),
   };
 
   const response = await fetch(url, {

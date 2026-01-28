@@ -252,6 +252,85 @@ export interface BuildRenderProps {
    * Works for both parts and shareCode rendering.
    */
   gridSettings?: GridSettings;
+
+  /**
+   * Animation mode for the auto-rotation.
+   * 
+   * - **bounce**: (default) Quick back-and-forth partial rotation with pauses
+   * - **spin360**: Slow continuous 360° rotation
+   * 
+   * @example
+   * ```tsx
+   * // Continuous slow spin (good for showcases)
+   * <BuildRender
+   *   shareCode="abc123"
+   *   animationMode="spin360"
+   *   spinDuration={12000}  // 12 seconds per full rotation
+   * />
+   * ```
+   * 
+   * @default "bounce"
+   */
+  animationMode?: 'bounce' | 'spin360';
+
+  /**
+   * Duration in milliseconds for one full 360° rotation.
+   * Only applies when `animationMode` is "spin360".
+   * 
+   * @example
+   * ```tsx
+   * <BuildRender
+   *   shareCode="abc123"
+   *   animationMode="spin360"
+   *   spinDuration={15000}  // 15 seconds per rotation
+   * />
+   * ```
+   * 
+   * @default 10000 (10 seconds)
+   */
+  spinDuration?: number;
+
+  /**
+   * Whether to enable user interaction (drag to rotate, scroll to zoom).
+   * 
+   * When set to `false`:
+   * - Drag-to-rotate is disabled
+   * - Scroll-to-zoom is disabled
+   * - Cursor shows as "pointer" instead of "grab"
+   * - Click events pass through (useful for wrapping in a link)
+   * 
+   * @example
+   * ```tsx
+   * // Non-interactive showcase with link
+   * <a href="https://buildcores.com/build/abc123">
+   *   <BuildRender
+   *     shareCode="abc123"
+   *     animationMode="spin360"
+   *     interactive={false}
+   *   />
+   * </a>
+   * ```
+   * 
+   * @default true
+   */
+  interactive?: boolean;
+
+  /**
+   * Frame quality for sprite renders.
+   * - **standard**: 72 frames (default) - good balance of quality and file size
+   * - **high**: 144 frames - smoother animation, larger file size (~2x file size)
+   * 
+   * @example
+   * ```tsx
+   * <BuildRender
+   *   shareCode="abc123"
+   *   frameQuality="high"  // 144 frames for smoother rotation
+   * />
+   * ```
+   * 
+   * @default "standard"
+   */
+  frameQuality?: 'standard' | 'high';
 }
 
 // API Types
@@ -473,6 +552,15 @@ export interface RenderBuildRequest {
    * Only applies when showGrid is true.
    */
   gridSettings?: GridSettings;
+
+  /**
+   * Frame quality for sprite renders.
+   * - **standard**: 72 frames (default) - good balance of quality and file size
+   * - **high**: 144 frames - smoother animation, larger file size
+   * 
+   * @default "standard"
+   */
+  frameQuality?: 'standard' | 'high';
 }
 
 /**
@@ -678,6 +766,8 @@ export interface RenderByShareCodeOptions {
   cameraOffsetX?: number;
   /** Grid appearance settings (for thicker/more visible grid in renders) */
   gridSettings?: GridSettings;
+  /** Frame quality - 'standard' (72 frames) or 'high' (144 frames for smoother animation) */
+  frameQuality?: 'standard' | 'high';
   /** Polling interval in milliseconds (default: 1500) */
   pollIntervalMs?: number;
   /** Timeout in milliseconds (default: 120000 = 2 minutes) */

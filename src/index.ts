@@ -27,6 +27,7 @@ export {
   calculateCircularFrame,
 } from "./hooks/useSpriteScrubbing";
 export { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
+export { useContinuousSpin } from "./hooks/useContinuousSpin";
 export { useBuildRender, arePartsEqual } from "./hooks/useBuildRender";
 export { useSpriteRender } from "./hooks/useSpriteRender";
 export type { UseBuildRenderReturn, UseBuildRenderOptions } from "./hooks/useBuildRender";

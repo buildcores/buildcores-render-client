@@ -43,6 +43,10 @@ function BuildViewer({ apiConfig }) {
   const [gridRenderOrder, setGridRenderOrder] = useState(-1);
   const [useCustomGridSettings, setUseCustomGridSettings] = useState(true); // Enhanced grid by default
   
+  // Frame quality for smoother animation
+  const [frameQuality, setFrameQuality] = useState('standard');
+  const [appliedFrameQuality, setAppliedFrameQuality] = useState('standard');
+  
   // Track applied settings (what's currently rendered)
   const [appliedWidth, setAppliedWidth] = useState(1920);
   const [appliedHeight, setAppliedHeight] = useState(1080);
@@ -77,7 +81,8 @@ function BuildViewer({ apiConfig }) {
     showGrid !== appliedShowGrid ||
     cameraOffsetX !== appliedCameraOffsetX ||
     useCustomGridSettings !== appliedUseCustomGridSettings ||
-    (useCustomGridSettings && JSON.stringify(currentGridSettings) !== JSON.stringify(appliedGridSettings))
+    (useCustomGridSettings && JSON.stringify(currentGridSettings) !== JSON.stringify(appliedGridSettings)) ||
+    frameQuality !== appliedFrameQuality
   );
 
   // Apply new settings and trigger re-render
@@ -90,6 +95,7 @@ function BuildViewer({ apiConfig }) {
     setAppliedCameraOffsetX(cameraOffsetX);
     setAppliedUseCustomGridSettings(useCustomGridSettings);
     setAppliedGridSettings(currentGridSettings);
+    setAppliedFrameQuality(frameQuality);
     setRenderKey(prev => prev + 1);
   };
 
@@ -162,13 +168,14 @@ function BuildViewer({ apiConfig }) {
       setAppliedCameraOffsetX(cameraOffsetX);
       setAppliedUseCustomGridSettings(useCustomGridSettings);
       setAppliedGridSettings(currentGridSettings);
+      setAppliedFrameQuality(frameQuality);
       setRenderKey(prev => prev + 1);
     } catch (err) {
       setBuildError(err.message || 'Failed to load build');
     } finally {
       setLoadingBuild(false);
     }
-  }, [shareCodeInput, apiConfig, width, height, useCustomResolution, profile, showGrid, cameraOffsetX, useCustomGridSettings, currentGridSettings]);
+  }, [shareCodeInput, apiConfig, width, height, useCustomResolution, profile, showGrid, cameraOffsetX, useCustomGridSettings, currentGridSettings, frameQuality]);
 
   // Handle Enter key in share code input
   const handleKeyDown = (e) => {
@@ -297,6 +304,18 @@ function BuildViewer({ apiConfig }) {
             <option value="cinematic">Cinematic - All effects (shadows, AO, bloom)</option>
             <option value="flat">Flat - No effects, clean product shots</option>
             <option value="fast">Fast - Minimal rendering, fastest speed</option>
+          </select>
+        </div>
+
+        <div className="quality-select-container" style={{ marginTop: '12px' }}>
+          <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Frame Quality</label>
+          <select 
+            value={frameQuality} 
+            onChange={(e) => setFrameQuality(e.target.value)}
+            className="quality-select"
+          >
+            <option value="standard">Standard - 72 frames (faster, smaller file)</option>
+            <option value="high">High - 144 frames (smoother animation)</option>
           </select>
         </div>
       </div>
@@ -491,6 +510,7 @@ function BuildViewer({ apiConfig }) {
                   showGrid={appliedShowGrid}
                   cameraOffsetX={appliedCameraOffsetX}
                   gridSettings={appliedUseCustomGridSettings ? appliedGridSettings : undefined}
+                  frameQuality={appliedFrameQuality}
                 />
               </div>
               

@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { useSpriteScrubbing } from "./hooks/useSpriteScrubbing";
 import { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
+import { useContinuousSpin } from "./hooks/useContinuousSpin";
 import { useSpriteRender, SpriteRenderInput } from "./hooks/useSpriteRender";
 import { BuildRenderProps } from "./types";
 import { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";
@@ -21,6 +22,10 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   showGrid,
   cameraOffsetX,
   gridSettings,
+  animationMode = 'bounce',
+  spinDuration = 10000,
+  interactive = true,
+  frameQuality,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -41,6 +46,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
         showGrid,
         cameraOffsetX,
         gridSettings,
+        frameQuality,
       };
     }
     return { 
@@ -49,17 +55,25 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       showGrid,
       cameraOffsetX,
       gridSettings,
+      frameQuality,
     };
-  }, [shareCode, parts, showGrid, cameraOffsetX, gridSettings]);
+  }, [shareCode, parts, showGrid, cameraOffsetX, gridSettings, frameQuality]);
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
     useSpriteRender(renderInput, apiConfig, undefined, useSpriteRenderOptions);
 
-  const { value: progressValue, isBouncing } =
-    useBouncePatternProgress(bouncingAllowed);
-
   const total = spriteMetadata ? spriteMetadata.totalFrames : 72;
+
+  // Animation hooks - only one will be active based on animationMode
+  const { value: progressValue, isBouncing } =
+    useBouncePatternProgress(bouncingAllowed && animationMode === 'bounce');
+  
+  const spinResult = useContinuousSpin(
+    bouncingAllowed && animationMode === 'spin360',
+    spinDuration,
+    total
+  );
   const cols = spriteMetadata ? spriteMetadata.cols : 12;
   const rows = spriteMetadata ? spriteMetadata.rows : 6;
   const frameRef = useRef(0);
@@ -74,9 +88,14 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     displayHeight: displayH,
   });
 
-  // Image/frame sizes
+  // Image/frame sizes - only calculate if image dimensions match expected metadata
+  // This prevents using stale image with new metadata during transitions
   const frameW = img ? img.width / cols : 0;
   const frameH = img ? img.height / rows : 0;
+  
+  // Track expected rows to detect stale images
+  const expectedRowsRef = useRef(rows);
+  expectedRowsRef.current = rows;
 
   // ---- Load sprite image ----
   useEffect(() => {
@@ -86,12 +105,19 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       return;
     }
 
+    // Clear current image immediately when source changes to prevent 
+    // using old image with new metadata
+    setImg(null);
     setIsLoading(true);
+    setBouncingAllowed(false);
+    
     const i = new Image();
     i.decoding = "async";
     i.loading = "eager";
     i.src = spriteSrc;
     i.onload = () => {
+      // Only set the image if rows haven't changed since we started loading
+      // This prevents race conditions where metadata updates mid-load
       setImg(i);
       setIsLoading(false);
       // Start bouncing animation after delay
@@ -103,11 +129,19 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       setImg(null);
       setIsLoading(false);
     };
-  }, [spriteSrc]);
+    
+    // Cleanup: if this effect re-runs (due to spriteSrc or rows change), 
+    // the new effect will clear the image
+    return () => {
+      // Abort loading if component updates before load completes
+      i.onload = null;
+      i.onerror = null;
+    };
+  }, [spriteSrc, rows]);
 
-  // ---- Drawing function ----
+  // ---- Drawing function with optional cross-fade interpolation ----
   const draw = useCallback(
-    (frameIndex: number) => {
+    (frameIndex: number, nextFrameIndex?: number, blend?: number) => {
       const cnv = canvasRef.current;
       if (!cnv || !img || !frameW || !frameH) return;
 
@@ -123,31 +157,60 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
         cnv.height = targetH;
       }
 
-      // Snap to integer frame (never between tiles)
-      let n = Math.round(frameIndex) % total;
-      if (n < 0) n += total;
-
-      const r = Math.floor(n / cols);
-      const c = n % cols;
-
-      // Use integer source rects to avoid sampling bleed across tiles
-      const sx = Math.round(c * frameW);
-      const sy = Math.round(r * frameH);
+      // Calculate destination dimensions (letterboxing)
       const sw = Math.round(frameW);
       const sh = Math.round(frameH);
+      const frameAspect = sw / sh;
+      const canvasAspect = targetW / targetH;
+
+      let drawW: number, drawH: number;
+      if (frameAspect > canvasAspect) {
+        drawW = targetW;
+        drawH = targetW / frameAspect;
+      } else {
+        drawH = targetH;
+        drawW = targetH * frameAspect;
+      }
+
+      // Apply zoom scale
+      drawW *= scale;
+      drawH *= scale;
+
+      // Center in canvas
+      const drawX = (targetW - drawW) / 2;
+      const drawY = (targetH - drawH) / 2;
 
       ctx.clearRect(0, 0, targetW, targetH);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
 
-      const scaledW = targetW * scale;
-      const scaledH = targetH * scale;
-      const offsetX = -((scaledW - targetW) / 2);
-      const offsetY = -((scaledH - targetH) / 2);
+      // Helper to draw a specific frame
+      const drawFrame = (frameIdx: number, opacity: number) => {
+        let n = Math.round(frameIdx) % total;
+        if (n < 0) n += total;
+        
+        const r = Math.floor(n / cols);
+        const c = n % cols;
+        const sx = Math.round(c * frameW);
+        const sy = Math.round(r * frameH);
 
-      ctx.drawImage(img, sx, sy, sw, sh, offsetX, offsetY, scaledW, scaledH);
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(img, sx, sy, sw, sh, drawX, drawY, drawW, drawH);
+      };
+
+      // Cross-fade interpolation for smooth animation
+      if (nextFrameIndex !== undefined && blend !== undefined && blend > 0.01) {
+        // Draw current frame at full opacity first
+        drawFrame(frameIndex, 1);
+        // Then overlay next frame with blend opacity for smooth transition
+        drawFrame(nextFrameIndex, blend);
+        ctx.globalAlpha = 1; // Reset
+      } else {
+        // Single frame draw (no interpolation)
+        drawFrame(frameIndex, 1);
+      }
     },
-    [img, frameW, frameH, displayW, displayH, cols, total, scale]
+    [img, frameW, frameH, displayW, displayH, cols, rows, total, scale]
   );
 
   const { isDragging, handleMouseDown, handleTouchStart, hasDragged } =
@@ -165,25 +228,31 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     setBouncingAllowed(false);
   }, []);
 
-  // Auto-rotate when bouncing is allowed and not dragged
+  // Auto-rotate when animation is allowed and user hasn't manually dragged
   useEffect(() => {
-    if (hasDragged.current || !img) return;
+    if ((interactive && hasDragged.current) || !img) return;
 
-    // Calculate frame based on progress value (similar to video time calculation)
-    const frame = ((progressValue / 5) * total) % total;
-    frameRef.current = frame;
-    draw(frame);
-  }, [progressValue, hasDragged, img, total, draw]);
+    if (animationMode === 'spin360') {
+      // Continuous 360 spin with cross-fade interpolation for smoothness
+      frameRef.current = spinResult.frame;
+      draw(spinResult.frame, spinResult.nextFrame, spinResult.blend);
+    } else {
+      // Bounce animation (no interpolation needed - it pauses between movements)
+      const frame = ((progressValue / 5) * total) % total;
+      frameRef.current = frame;
+      draw(frame);
+    }
+  }, [progressValue, spinResult, hasDragged, img, total, draw, animationMode, interactive]);
 
   // Reset zoom when sprite changes or container size updates
   useEffect(() => {
     resetZoom();
   }, [spriteSrc, displayW, displayH, resetZoom]);
 
-  // Add native wheel event listener to prevent scrolling AND handle zoom
+  // Add native wheel event listener to prevent scrolling AND handle zoom (only when interactive)
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !interactive) return;
 
     const handleNativeWheel = (event: WheelEvent) => {
       event.preventDefault();
@@ -220,7 +289,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     return () => {
       container.removeEventListener('wheel', handleNativeWheel);
     };
-  }, [handleZoomWheel, scale, displayH]);
+  }, [handleZoomWheel, scale, displayH, interactive]);
 
   // Initial draw once image is ready or zoom changes
   useEffect(() => {
@@ -263,21 +332,22 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       {img && (
         <canvas
           ref={canvasRef}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleCanvasTouchStart}
+          onMouseDown={interactive ? handleMouseDown : undefined}
+          onTouchStart={interactive ? handleCanvasTouchStart : undefined}
           style={{
             width: displayW,
             height: displayH,
-            cursor: isDragging ? "grabbing" : "grab",
-            touchAction: "none", // Prevents default touch behaviors like scrolling
+            cursor: interactive ? (isDragging ? "grabbing" : "grab") : "pointer",
+            touchAction: interactive ? "none" : "auto",
             display: "block",
             userSelect: "none",
             WebkitUserSelect: "none",
             WebkitTouchCallout: "none",
+            pointerEvents: interactive ? "auto" : "none", // Allow click-through when not interactive
           }}
           role="img"
           aria-label="360° viewer"
-          onContextMenu={(e) => e.preventDefault()}
+          onContextMenu={interactive ? (e) => e.preventDefault() : undefined}
         />
       )}
 
@@ -289,6 +359,8 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
 
       <InstructionTooltip
         isVisible={
+          interactive &&
+          animationMode === 'bounce' &&
           !isLoading &&
           !isRenderingSprite &&
           !renderError &&
