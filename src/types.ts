@@ -331,6 +331,48 @@ export interface BuildRenderProps {
    * @default "standard"
    */
   frameQuality?: 'standard' | 'high';
+
+  /**
+   * Initial zoom level for the build.
+   * Range: 0.5 (50%) to 2.5 (250%). Values less than 1 make the build appear smaller,
+   * values greater than 1 make it appear larger.
+   * 
+   * @example
+   * ```tsx
+   * <BuildRender
+   *   shareCode="abc123"
+   *   zoom={0.7}  // 70% size - build appears smaller
+   * />
+   * 
+   * <BuildRender
+   *   shareCode="abc123"
+   *   zoom={1.5}  // 150% size - build appears larger
+   * />
+   * ```
+   * 
+   * @default 1
+   */
+  zoom?: number;
+
+  /**
+   * Camera zoom level for server-side rendering.
+   * Values > 1 move the camera further away (build appears smaller in the sprite).
+   * Values < 1 move the camera closer (build appears larger in the sprite).
+   * 
+   * Use this for higher quality scaled-down renders vs client-side zoom scaling.
+   * Range: 0.5 to 2.0
+   * 
+   * @example
+   * ```tsx
+   * <BuildRender
+   *   shareCode="abc123"
+   *   cameraZoom={1.3}  // Camera 30% further away - smaller build in sprite
+   * />
+   * ```
+   * 
+   * @default 1
+   */
+  cameraZoom?: number;
 }
 
 // API Types
@@ -561,6 +603,16 @@ export interface RenderBuildRequest {
    * @default "standard"
    */
   frameQuality?: 'standard' | 'high';
+
+  /**
+   * Camera zoom level for server-side rendering.
+   * Values > 1 move the camera further away (build appears smaller in the sprite).
+   * Values < 1 move the camera closer (build appears larger in the sprite).
+   * Range: 0.5 to 2.0
+   * 
+   * @default 1
+   */
+  cameraZoom?: number;
 }
 
 /**
@@ -714,6 +766,11 @@ export interface BuildResponse {
   partDetails: {
     [K in PartCategory]?: PartDetailsWithCategory[];
   };
+  /**
+   * Whether the case in this build has an interactive 3D model available.
+   * If false, the build cannot be rendered in 3D.
+   */
+  hasInteractiveModel: boolean;
 }
 
 /**
@@ -768,6 +825,8 @@ export interface RenderByShareCodeOptions {
   gridSettings?: GridSettings;
   /** Frame quality - 'standard' (72 frames) or 'high' (144 frames for smoother animation) */
   frameQuality?: 'standard' | 'high';
+  /** Camera zoom level for rendering. Values > 1 move camera further (build appears smaller). Range: 0.5 to 2.0 */
+  cameraZoom?: number;
   /** Polling interval in milliseconds (default: 1500) */
   pollIntervalMs?: number;
   /** Timeout in milliseconds (default: 120000 = 2 minutes) */

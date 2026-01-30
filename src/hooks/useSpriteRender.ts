@@ -43,6 +43,7 @@ export type SpriteRenderInput =
       parts: RenderBuildRequest;
       showGrid?: boolean;
       cameraOffsetX?: number;
+      cameraZoom?: number;
       gridSettings?: RenderGridSettings;
       frameQuality?: 'standard' | 'high';
     }
@@ -52,6 +53,7 @@ export type SpriteRenderInput =
       profile?: 'cinematic' | 'flat' | 'fast';
       showGrid?: boolean;
       cameraOffsetX?: number;
+      cameraZoom?: number;
       gridSettings?: RenderGridSettings;
       frameQuality?: 'standard' | 'high';
     };
@@ -93,6 +95,7 @@ export const useSpriteRender = (
               profile: currentInput.profile,
               showGrid: currentInput.showGrid,
               cameraOffsetX: currentInput.cameraOffsetX,
+              cameraZoom: currentInput.cameraZoom,
               gridSettings: currentInput.gridSettings,
               frameQuality: currentInput.frameQuality
             }
@@ -124,6 +127,7 @@ export const useSpriteRender = (
               ...currentParts,
               showGrid: currentInput.showGrid,
               cameraOffsetX: currentInput.cameraOffsetX,
+              cameraZoom: currentInput.cameraZoom,
               gridSettings: currentInput.gridSettings,
               frameQuality,
             },
@@ -153,6 +157,7 @@ export const useSpriteRender = (
               format: "sprite",
               showGrid: currentInput.showGrid,
               cameraOffsetX: currentInput.cameraOffsetX,
+              cameraZoom: currentInput.cameraZoom,
               gridSettings: currentInput.gridSettings,
               frameQuality,
             },
@@ -192,6 +197,7 @@ export const useSpriteRender = (
              a.profile === b.profile &&
              a.showGrid === b.showGrid &&
              a.cameraOffsetX === b.cameraOffsetX &&
+             a.cameraZoom === b.cameraZoom &&
              a.frameQuality === b.frameQuality &&
              gridSettingsEqual;
     }
@@ -202,6 +208,7 @@ export const useSpriteRender = (
       return arePartsEqual(a.parts, b.parts) &&
              a.showGrid === b.showGrid &&
              a.cameraOffsetX === b.cameraOffsetX &&
+             a.cameraZoom === b.cameraZoom &&
              a.frameQuality === b.frameQuality &&
              gridSettingsEqual;
     }

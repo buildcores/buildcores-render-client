@@ -190,6 +190,8 @@ export const createRenderBuildJob = async (
     ...(request.gridSettings ? { gridSettings: request.gridSettings } : {}),
     // Include frame quality for sprite rendering
     ...(request.frameQuality ? { frameQuality: request.frameQuality } : {}),
+    // Include camera zoom for render-time scaling
+    ...(request.cameraZoom !== undefined ? { cameraZoom: request.cameraZoom } : {}),
   };
 
   const response = await fetch(buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config), {
@@ -452,6 +454,7 @@ export const createRenderByShareCodeJob = async (
     ...(options?.cameraOffsetX !== undefined ? { cameraOffsetX: options.cameraOffsetX } : {}),
     ...(options?.gridSettings ? { gridSettings: options.gridSettings } : {}),
     ...(options?.frameQuality ? { frameQuality: options.frameQuality } : {}),
+    ...(options?.cameraZoom !== undefined ? { cameraZoom: options.cameraZoom } : {}),
   };
 
   const response = await fetch(url, {

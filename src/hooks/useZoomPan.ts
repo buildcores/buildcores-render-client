@@ -12,6 +12,7 @@ interface UseZoomOptions {
   displayHeight?: number;
   minScale?: number;
   maxScale?: number;
+  initialScale?: number;
 }
 
 interface UseZoomReturn {
@@ -38,13 +39,14 @@ const getTouchDistance = (touches: TouchList | React.TouchList) => {
 export const useZoomPan = ({
   displayWidth,
   displayHeight,
-  minScale = 1,
-  maxScale = 4,
+  minScale = 0.5,
+  maxScale = 2.5,
+  initialScale = 1,
 }: UseZoomOptions = {}): UseZoomReturn => {
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(initialScale);
   const [isPinching, setIsPinching] = useState(false);
 
-  const scaleRef = useRef(1);
+  const scaleRef = useRef(initialScale);
   const pinchDataRef = useRef({
     initialDistance: 0,
     initialScale: 1,
@@ -135,9 +137,9 @@ export const useZoomPan = ({
   }, [isPinching, setScaleSafe]);
 
   const reset = useCallback(() => {
-    scaleRef.current = 1;
-    setScale(1);
-  }, []);
+    scaleRef.current = initialScale;
+    setScale(initialScale);
+  }, [initialScale]);
 
   return {
     scale,

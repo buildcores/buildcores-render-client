@@ -46,6 +46,10 @@ function BuildViewer({ apiConfig }) {
   // Frame quality for smoother animation
   const [frameQuality, setFrameQuality] = useState('standard');
   const [appliedFrameQuality, setAppliedFrameQuality] = useState('standard');
+
+  // Server-side camera zoom (values > 1 = camera further away, build appears smaller in sprite)
+  const [cameraZoom, setCameraZoom] = useState(1.0);
+  const [appliedCameraZoom, setAppliedCameraZoom] = useState(1.0);
   
   // Track applied settings (what's currently rendered)
   const [appliedWidth, setAppliedWidth] = useState(1920);
@@ -80,6 +84,7 @@ function BuildViewer({ apiConfig }) {
     profile !== appliedProfile ||
     showGrid !== appliedShowGrid ||
     cameraOffsetX !== appliedCameraOffsetX ||
+    cameraZoom !== appliedCameraZoom ||
     useCustomGridSettings !== appliedUseCustomGridSettings ||
     (useCustomGridSettings && JSON.stringify(currentGridSettings) !== JSON.stringify(appliedGridSettings)) ||
     frameQuality !== appliedFrameQuality
@@ -93,6 +98,7 @@ function BuildViewer({ apiConfig }) {
     setAppliedProfile(profile);
     setAppliedShowGrid(showGrid);
     setAppliedCameraOffsetX(cameraOffsetX);
+    setAppliedCameraZoom(cameraZoom);
     setAppliedUseCustomGridSettings(useCustomGridSettings);
     setAppliedGridSettings(currentGridSettings);
     setAppliedFrameQuality(frameQuality);
@@ -166,6 +172,7 @@ function BuildViewer({ apiConfig }) {
       setAppliedProfile(profile);
       setAppliedShowGrid(showGrid);
       setAppliedCameraOffsetX(cameraOffsetX);
+      setAppliedCameraZoom(cameraZoom);
       setAppliedUseCustomGridSettings(useCustomGridSettings);
       setAppliedGridSettings(currentGridSettings);
       setAppliedFrameQuality(frameQuality);
@@ -175,7 +182,7 @@ function BuildViewer({ apiConfig }) {
     } finally {
       setLoadingBuild(false);
     }
-  }, [shareCodeInput, apiConfig, width, height, useCustomResolution, profile, showGrid, cameraOffsetX, useCustomGridSettings, currentGridSettings, frameQuality]);
+  }, [shareCodeInput, apiConfig, width, height, useCustomResolution, profile, showGrid, cameraOffsetX, cameraZoom, useCustomGridSettings, currentGridSettings, frameQuality]);
 
   // Handle Enter key in share code input
   const handleKeyDown = (e) => {
@@ -380,6 +387,32 @@ function BuildViewer({ apiConfig }) {
             </div>
           </div>
 
+          {/* Camera Zoom (Server-side) */}
+          <div className="slider-group">
+            <label htmlFor="viewer-camera-zoom-slider">
+              Render Zoom: <span className="value">{(cameraZoom * 100).toFixed(0)}%</span>
+              <span className="offset-hint">
+                {cameraZoom > 1 ? ' (build appears smaller)' : cameraZoom < 1 ? ' (build appears larger)' : ' (default)'}
+              </span>
+            </label>
+            <input
+              id="viewer-camera-zoom-slider"
+              type="range"
+              min="0.5"
+              max="2.0"
+              step="0.1"
+              value={cameraZoom}
+              onChange={(e) => setCameraZoom(parseFloat(e.target.value))}
+              className="slider"
+            />
+            <div className="offset-presets">
+              <button onClick={() => setCameraZoom(0.7)} className={cameraZoom === 0.7 ? 'active' : ''}>70%</button>
+              <button onClick={() => setCameraZoom(1.0)} className={cameraZoom === 1.0 ? 'active' : ''}>100%</button>
+              <button onClick={() => setCameraZoom(1.3)} className={cameraZoom === 1.3 ? 'active' : ''}>130%</button>
+              <button onClick={() => setCameraZoom(1.5)} className={cameraZoom === 1.5 ? 'active' : ''}>150%</button>
+            </div>
+          </div>
+
           {/* Grid Settings */}
           {showGrid && (
             <div className="grid-settings">
@@ -509,6 +542,7 @@ function BuildViewer({ apiConfig }) {
                   apiConfig={apiConfig}
                   showGrid={appliedShowGrid}
                   cameraOffsetX={appliedCameraOffsetX}
+                  cameraZoom={appliedCameraZoom}
                   gridSettings={appliedUseCustomGridSettings ? appliedGridSettings : undefined}
                   frameQuality={appliedFrameQuality}
                 />
@@ -534,6 +568,9 @@ function BuildViewer({ apiConfig }) {
                   Grid: <strong>{appliedShowGrid ? 'On' : 'Off'}</strong>
                   {appliedCameraOffsetX !== 0 && (
                     <span> • Offset: <strong>{appliedCameraOffsetX > 0 ? 'Right' : 'Left'}</strong></span>
+                  )}
+                  {appliedCameraZoom !== 1 && (
+                    <span> • Render Zoom: <strong>{(appliedCameraZoom * 100).toFixed(0)}%</strong></span>
                   )}
                 </p>
               </div>

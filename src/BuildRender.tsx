@@ -21,11 +21,13 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   touchSensitivity = 0.2,
   showGrid,
   cameraOffsetX,
+  cameraZoom,
   gridSettings,
   animationMode = 'bounce',
   spinDuration = 10000,
   interactive = true,
   frameQuality,
+  zoom = 1,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -45,6 +47,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
         profile: parts?.profile,
         showGrid,
         cameraOffsetX,
+        cameraZoom,
         gridSettings,
         frameQuality,
       };
@@ -54,10 +57,11 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       parts: parts!,
       showGrid,
       cameraOffsetX,
+      cameraZoom,
       gridSettings,
       frameQuality,
     };
-  }, [shareCode, parts, showGrid, cameraOffsetX, gridSettings, frameQuality]);
+  }, [shareCode, parts, showGrid, cameraOffsetX, cameraZoom, gridSettings, frameQuality]);
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
@@ -86,6 +90,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   } = useZoomPan({
     displayWidth: displayW,
     displayHeight: displayH,
+    initialScale: zoom,
   });
 
   // Image/frame sizes - only calculate if image dimensions match expected metadata

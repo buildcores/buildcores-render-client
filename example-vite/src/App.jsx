@@ -76,10 +76,15 @@ function App() {
   const [showcaseSpinDuration, setShowcaseSpinDuration] = useState(5000);
   const [showcaseInteractive, setShowcaseInteractive] = useState(false);
   const [showcaseAnimationMode, setShowcaseAnimationMode] = useState('spin360');
+  const [showcaseZoom, setShowcaseZoom] = useState(1.0);
 
   // Frame quality for smoother animation (default to 'high' for showcase mode)
   const [frameQuality, setFrameQuality] = useState('high');
   const [appliedFrameQuality, setAppliedFrameQuality] = useState('high');
+
+  // Server-side camera zoom (values > 1 = camera further away, build appears smaller in sprite)
+  const [cameraZoom, setCameraZoom] = useState(1.0);
+  const [appliedCameraZoom, setAppliedCameraZoom] = useState(1.0);
 
   // Build current grid settings object
   const currentGridSettings = useCustomGridSettings ? {
@@ -96,6 +101,7 @@ function App() {
                      profile !== appliedProfile ||
                      showGrid !== appliedShowGrid ||
                      cameraOffsetX !== appliedCameraOffsetX ||
+                     cameraZoom !== appliedCameraZoom ||
                      useCustomGridSettings !== appliedUseCustomGridSettings ||
                      (useCustomGridSettings && JSON.stringify(currentGridSettings) !== JSON.stringify(appliedGridSettings)) ||
                      frameQuality !== appliedFrameQuality;
@@ -108,6 +114,7 @@ function App() {
     setAppliedProfile(profile);
     setAppliedShowGrid(showGrid);
     setAppliedCameraOffsetX(cameraOffsetX);
+    setAppliedCameraZoom(cameraZoom);
     setAppliedUseCustomGridSettings(useCustomGridSettings);
     setAppliedGridSettings(currentGridSettings);
     setAppliedFrameQuality(frameQuality);
@@ -297,6 +304,28 @@ function App() {
                     </button>
                   </div>
                 </div>
+
+                {/* Zoom Level */}
+                <div className="slider-group">
+                  <label>
+                    Zoom: <span className="value">{(showcaseZoom * 100).toFixed(0)}%</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.5"
+                    step="0.1"
+                    value={showcaseZoom}
+                    onChange={(e) => setShowcaseZoom(parseFloat(e.target.value))}
+                    className="slider"
+                  />
+                  <div className="preset-buttons">
+                    <button onClick={() => setShowcaseZoom(0.5)}>50%</button>
+                    <button onClick={() => setShowcaseZoom(0.75)}>75%</button>
+                    <button onClick={() => setShowcaseZoom(1.0)}>100%</button>
+                    <button onClick={() => setShowcaseZoom(1.5)}>150%</button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -325,6 +354,7 @@ function App() {
                     interactive={showcaseInteractive}
                     showGrid={true}
                     frameQuality={frameQuality}
+                    zoom={showcaseZoom}
                   />
                   {!showcaseInteractive && (
                     <div className="click-hint">Click to visit BuildCores.com</div>
@@ -515,6 +545,32 @@ function App() {
               </div>
             </div>
 
+            {/* Camera Zoom (Server-side) */}
+            <div className="slider-group">
+              <label htmlFor="camera-zoom-slider">
+                Render Zoom: <span className="value">{(cameraZoom * 100).toFixed(0)}%</span>
+                <span className="offset-hint">
+                  {cameraZoom > 1 ? ' (build appears smaller)' : cameraZoom < 1 ? ' (build appears larger)' : ' (default)'}
+                </span>
+              </label>
+              <input
+                id="camera-zoom-slider"
+                type="range"
+                min="0.5"
+                max="2.0"
+                step="0.1"
+                value={cameraZoom}
+                onChange={(e) => setCameraZoom(parseFloat(e.target.value))}
+                className="slider"
+              />
+              <div className="offset-presets">
+                <button onClick={() => setCameraZoom(0.7)} className={cameraZoom === 0.7 ? 'active' : ''}>70%</button>
+                <button onClick={() => setCameraZoom(1.0)} className={cameraZoom === 1.0 ? 'active' : ''}>100%</button>
+                <button onClick={() => setCameraZoom(1.3)} className={cameraZoom === 1.3 ? 'active' : ''}>130%</button>
+                <button onClick={() => setCameraZoom(1.5)} className={cameraZoom === 1.5 ? 'active' : ''}>150%</button>
+              </div>
+            </div>
+
             {/* Grid Settings */}
             {showGrid && (
               <div className="grid-settings">
@@ -627,6 +683,7 @@ function App() {
               apiConfig={API_CONFIG}
               showGrid={appliedShowGrid}
               cameraOffsetX={appliedCameraOffsetX}
+              cameraZoom={appliedCameraZoom}
               gridSettings={appliedGridSettingsObj}
               frameQuality={appliedFrameQuality}
             />
@@ -652,6 +709,9 @@ function App() {
               Grid: <strong>{appliedShowGrid ? 'On' : 'Off'}</strong>
               {appliedCameraOffsetX !== 0 && (
                 <span> • Offset: <strong>{appliedCameraOffsetX > 0 ? 'Right' : 'Left'}</strong></span>
+              )}
+              {appliedCameraZoom !== 1 && (
+                <span> • Render Zoom: <strong>{(appliedCameraZoom * 100).toFixed(0)}%</strong></span>
               )}
             </p>
           </div>
