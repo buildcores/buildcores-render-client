@@ -52,6 +52,7 @@ export interface RenderJobStatusResponse {
   url?: string | null;
   video_url?: string | null;
   sprite_url?: string | null;
+  screenshot_url?: string | null;
   error?: string | null;
   end_time?: string | null;
 }
@@ -113,18 +114,102 @@ export const buildApiUrl = (endpoint: string, config: ApiConfig): string => {
   return baseUrl;
 };
 
+type SessionTokenSupplier = NonNullable<ApiConfig["getRenderSessionToken"]>;
+type SessionTokenCacheEntry = {
+  token: string;
+  expiresAtMs: number;
+};
+
+const SESSION_TOKEN_REFRESH_WINDOW_MS = 15_000;
+const sessionTokenCache = new WeakMap<SessionTokenSupplier, SessionTokenCacheEntry>();
+
+const resolveAuthMode = (config: ApiConfig): "legacy" | "session" =>
+  config.authMode ?? (config.getRenderSessionToken ? "session" : "legacy");
+
+const isSessionAuthMode = (config: ApiConfig): boolean => resolveAuthMode(config) === "session";
+
+const parseExpiresAtMs = (expiresAt: string): number => {
+  const parsed = Date.parse(expiresAt);
+  if (!Number.isFinite(parsed)) {
+    throw new Error("Invalid session token expiry (expiresAt)");
+  }
+  return parsed;
+};
+
+const resolveSessionToken = async (config: ApiConfig, forceRefresh: boolean): Promise<string> => {
+  const supplier = config.getRenderSessionToken;
+  if (!supplier) {
+    throw new Error("authMode=session requires getRenderSessionToken");
+  }
+
+  const cached = sessionTokenCache.get(supplier);
+  const now = Date.now();
+  if (
+    !forceRefresh &&
+    cached &&
+    cached.expiresAtMs - SESSION_TOKEN_REFRESH_WINDOW_MS > now
+  ) {
+    return cached.token;
+  }
+
+  const session = await supplier();
+  if (!session?.token || !session?.expiresAt) {
+    throw new Error("getRenderSessionToken must return { token, expiresAt }");
+  }
+
+  const expiresAtMs = parseExpiresAtMs(session.expiresAt);
+  sessionTokenCache.set(supplier, {
+    token: session.token,
+    expiresAtMs,
+  });
+  return session.token;
+};
+
+const resolveAuthToken = async (config: ApiConfig, forceRefresh: boolean): Promise<string | undefined> => {
+  if (isSessionAuthMode(config)) {
+    return resolveSessionToken(config, forceRefresh);
+  }
+  return config.authToken;
+};
+
 // Helper to build request headers with auth token
-export const buildHeaders = (config: ApiConfig): Record<string, string> => {
+export const buildHeaders = (
+  config: ApiConfig,
+  authTokenOverride?: string
+): Record<string, string> => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     accept: "application/json",
   };
 
-  if (config.authToken) {
-    headers["Authorization"] = `Bearer ${config.authToken}`;
+  const authToken = authTokenOverride ?? config.authToken;
+  if (authToken) {
+    headers["Authorization"] = `Bearer ${authToken}`;
   }
 
   return headers;
+};
+
+const fetchWithApiAuth = async (
+  url: string,
+  init: RequestInit,
+  config: ApiConfig
+): Promise<Response> => {
+  const firstToken = await resolveAuthToken(config, false);
+  const firstResponse = await fetch(url, {
+    ...init,
+    headers: buildHeaders(config, firstToken),
+  });
+
+  if (!isSessionAuthMode(config) || firstResponse.status !== 401) {
+    return firstResponse;
+  }
+
+  const refreshedToken = await resolveAuthToken(config, true);
+  return fetch(url, {
+    ...init,
+    headers: buildHeaders(config, refreshedToken),
+  });
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -142,15 +227,20 @@ export const renderBuildExperimental = async (
     ...(request.height !== undefined ? { height: request.height } : {}),
     // Include profile if provided
     ...(request.profile ? { profile: request.profile } : {}),
+    ...(request.scene ? { scene: request.scene } : {}),
+    ...(request.showBackground !== undefined ? { showBackground: request.showBackground } : {}),
+    ...(request.showGrid !== undefined ? { showGrid: request.showGrid } : {}),
+    ...(request.winterMode !== undefined ? { winterMode: request.winterMode } : {}),
+    ...(request.springMode !== undefined ? { springMode: request.springMode } : {}),
   };
 
-  const response = await fetch(
+  const response = await fetchWithApiAuth(
     buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL, config),
     {
       method: "POST",
-      headers: buildHeaders(config),
       body: JSON.stringify(requestWithFormat),
-    }
+    },
+    config
   );
 
   if (!response.ok) {
@@ -184,8 +274,12 @@ export const createRenderBuildJob = async (
     ...(request.height !== undefined ? { height: request.height } : {}),
     // Include profile if provided
     ...(request.profile ? { profile: request.profile } : {}),
+    ...(request.scene ? { scene: request.scene } : {}),
+    ...(request.showBackground !== undefined ? { showBackground: request.showBackground } : {}),
     // Include composition settings
     ...(request.showGrid !== undefined ? { showGrid: request.showGrid } : {}),
+    ...(request.winterMode !== undefined ? { winterMode: request.winterMode } : {}),
+    ...(request.springMode !== undefined ? { springMode: request.springMode } : {}),
     ...(request.cameraOffsetX !== undefined ? { cameraOffsetX: request.cameraOffsetX } : {}),
     ...(request.gridSettings ? { gridSettings: request.gridSettings } : {}),
     // Include frame quality for sprite rendering
@@ -194,11 +288,14 @@ export const createRenderBuildJob = async (
     ...(request.cameraZoom !== undefined ? { cameraZoom: request.cameraZoom } : {}),
   };
 
-  const response = await fetch(buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config), {
-    method: "POST",
-    headers: buildHeaders(config),
-    body: JSON.stringify(body),
-  });
+  const response = await fetchWithApiAuth(
+    buildApiUrl(API_ENDPOINTS.RENDER_BUILD, config),
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+    config
+  );
 
   if (!response.ok) {
     throw new Error(`Create render job failed: ${response.status} ${response.statusText}`);
@@ -216,10 +313,11 @@ export const getRenderBuildStatus = async (
   config: ApiConfig
 ): Promise<RenderJobStatusResponse> => {
   const url = buildApiUrl(`${API_ENDPOINTS.RENDER_BUILD}/${encodeURIComponent(jobId)}`, config);
-  const response = await fetch(url, {
-    method: "GET",
-    headers: buildHeaders(config),
-  });
+  const response = await fetchWithApiAuth(
+    url,
+    { method: "GET" },
+    config
+  );
 
   if (response.status === 404) {
     throw new Error("Render job not found");
@@ -280,15 +378,20 @@ export const renderSpriteExperimental = async (
     ...(request.height !== undefined ? { height: request.height } : {}),
     // Include profile if provided
     ...(request.profile ? { profile: request.profile } : {}),
+    ...(request.scene ? { scene: request.scene } : {}),
+    ...(request.showBackground !== undefined ? { showBackground: request.showBackground } : {}),
+    ...(request.showGrid !== undefined ? { showGrid: request.showGrid } : {}),
+    ...(request.winterMode !== undefined ? { winterMode: request.winterMode } : {}),
+    ...(request.springMode !== undefined ? { springMode: request.springMode } : {}),
   };
 
-  const response = await fetch(
+  const response = await fetchWithApiAuth(
     buildApiUrl(API_ENDPOINTS.RENDER_BUILD_EXPERIMENTAL, config),
     {
       method: "POST",
-      headers: buildHeaders(config),
       body: JSON.stringify(requestWithFormat),
-    }
+    },
+    config
   );
 
   if (!response.ok) {
@@ -324,10 +427,11 @@ export const getAvailableParts = async (
   const separator = base.includes("?") ? "&" : "?";
   const url = `${base}${separator}${params.toString()}`;
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: buildHeaders(config),
-  });
+  const response = await fetchWithApiAuth(
+    url,
+    { method: "GET" },
+    config
+  );
 
   if (!response.ok) {
     throw new Error(
@@ -370,10 +474,11 @@ export const getBuildByShareCode = async (
 ): Promise<BuildResponse> => {
   const url = buildApiUrl(`${API_ENDPOINTS.BUILD}/${encodeURIComponent(shareCode)}`, config);
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: buildHeaders(config),
-  });
+  const response = await fetchWithApiAuth(
+    url,
+    { method: "GET" },
+    config
+  );
 
   if (response.status === 404) {
     throw new Error("Build not found");
@@ -413,11 +518,14 @@ export const getPartsByIds = async (
 ): Promise<PartsResponse> => {
   const url = buildApiUrl(API_ENDPOINTS.PARTS, config);
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: buildHeaders(config),
-    body: JSON.stringify({ ids: partIds }),
-  });
+  const response = await fetchWithApiAuth(
+    url,
+    {
+      method: "POST",
+      body: JSON.stringify({ ids: partIds }),
+    },
+    config
+  );
 
   if (!response.ok) {
     throw new Error(
@@ -450,18 +558,25 @@ export const createRenderByShareCodeJob = async (
     ...(options?.width !== undefined ? { width: options.width } : {}),
     ...(options?.height !== undefined ? { height: options.height } : {}),
     ...(options?.profile ? { profile: options.profile } : {}),
+    ...(options?.scene ? { scene: options.scene } : {}),
+    ...(options?.showBackground !== undefined ? { showBackground: options.showBackground } : {}),
     ...(options?.showGrid !== undefined ? { showGrid: options.showGrid } : {}),
+    ...(options?.winterMode !== undefined ? { winterMode: options.winterMode } : {}),
+    ...(options?.springMode !== undefined ? { springMode: options.springMode } : {}),
     ...(options?.cameraOffsetX !== undefined ? { cameraOffsetX: options.cameraOffsetX } : {}),
     ...(options?.gridSettings ? { gridSettings: options.gridSettings } : {}),
     ...(options?.frameQuality ? { frameQuality: options.frameQuality } : {}),
     ...(options?.cameraZoom !== undefined ? { cameraZoom: options.cameraZoom } : {}),
   };
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: buildHeaders(config),
-    body: JSON.stringify(body),
-  });
+  const response = await fetchWithApiAuth(
+    url,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+    config
+  );
 
   if (response.status === 404) {
     throw new Error("Build not found");

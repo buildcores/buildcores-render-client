@@ -241,6 +241,28 @@ export interface BuildRenderProps {
   showGrid?: boolean;
 
   /**
+   * Environment scene preset for rendering.
+   */
+  scene?: RenderScene;
+
+  /**
+   * Whether to show the environment background.
+   */
+  showBackground?: boolean;
+
+  /**
+   * Enable winter mode effects.
+   * Mutually exclusive with springMode.
+   */
+  winterMode?: boolean;
+
+  /**
+   * Enable spring mode effects.
+   * Mutually exclusive with winterMode.
+   */
+  springMode?: boolean;
+
+  /**
    * Camera offset X for composition.
    * Positive values shift the build to the right, leaving room for text overlay on the left.
    * Works for both parts and shareCode rendering.
@@ -408,6 +430,24 @@ export interface ApiConfig {
    * ```
    */
   authToken?: string;
+
+  /**
+   * Auth mode for API requests.
+   * - legacy: Sends `authToken` directly as bearer token.
+   * - session: Uses `getRenderSessionToken` to fetch short-lived delegated tokens.
+   *
+   * @default "legacy"
+   */
+  authMode?: 'legacy' | 'session';
+
+  /**
+   * Session token supplier used when `authMode` is "session".
+   * Should call your backend endpoint that brokers BuildCores session tokens.
+   */
+  getRenderSessionToken?: () => Promise<{
+    token: string;
+    expiresAt: string;
+  }>;
 }
 
 /**
@@ -581,6 +621,28 @@ export interface RenderBuildRequest {
    * Defaults to true for cinematic profile, false otherwise.
    */
   showGrid?: boolean;
+
+  /**
+   * Environment scene preset.
+   */
+  scene?: RenderScene;
+
+  /**
+   * Whether to show the environment background.
+   */
+  showBackground?: boolean;
+
+  /**
+   * Enable winter mode effects.
+   * Mutually exclusive with springMode.
+   */
+  winterMode?: boolean;
+
+  /**
+   * Enable spring mode effects.
+   * Mutually exclusive with winterMode.
+   */
+  springMode?: boolean;
 
   /**
    * Horizontal offset for the camera view.
@@ -806,6 +868,22 @@ export interface GridSettings {
 }
 
 /**
+ * Supported environment scene presets for render API endpoints.
+ */
+export type RenderScene =
+  | "sunset"
+  | "dawn"
+  | "night"
+  | "warehouse"
+  | "forest"
+  | "apartment"
+  | "studio"
+  | "studio_v2"
+  | "city"
+  | "park"
+  | "lobby";
+
+/**
  * Options for rendering a build by share code
  */
 export interface RenderByShareCodeOptions {
@@ -817,8 +895,16 @@ export interface RenderByShareCodeOptions {
   height?: number;
   /** Render quality profile */
   profile?: "cinematic" | "flat" | "fast";
+  /** Environment scene preset */
+  scene?: RenderScene;
+  /** Whether to show the environment background */
+  showBackground?: boolean;
   /** Show grid in render (default: true for cinematic profile) */
   showGrid?: boolean;
+  /** Enable winter mode effects (mutually exclusive with springMode) */
+  winterMode?: boolean;
+  /** Enable spring mode effects (mutually exclusive with winterMode) */
+  springMode?: boolean;
   /** Camera offset X for composition (positive = shift build right to leave room for text overlay) */
   cameraOffsetX?: number;
   /** Grid appearance settings (for thicker/more visible grid in renders) */

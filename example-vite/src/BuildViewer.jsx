@@ -2,6 +2,20 @@ import React, { useState, useCallback } from 'react';
 import { getBuildByShareCode, BuildRender } from '@buildcores/render-client';
 import './BuildViewer.css';
 
+const SCENE_OPTIONS = [
+  'sunset',
+  'dawn',
+  'night',
+  'warehouse',
+  'forest',
+  'apartment',
+  'studio',
+  'studio_v2',
+  'city',
+  'park',
+  'lobby'
+];
+
 /**
  * BuildViewer - Demo component for loading and rendering builds by share code
  * 
@@ -33,6 +47,10 @@ function BuildViewer({ apiConfig }) {
   
   // Composition controls
   const [showGrid, setShowGrid] = useState(true);
+  const [scene, setScene] = useState('studio_v2');
+  const [showBackground, setShowBackground] = useState(false);
+  const [winterMode, setWinterMode] = useState(false);
+  const [springMode, setSpringMode] = useState(false);
   const [cameraOffsetX, setCameraOffsetX] = useState(0);
   
   // Grid settings for enhanced visibility in renders
@@ -57,6 +75,10 @@ function BuildViewer({ apiConfig }) {
   const [appliedCustomResolution, setAppliedCustomResolution] = useState(true);
   const [appliedProfile, setAppliedProfile] = useState('cinematic');
   const [appliedShowGrid, setAppliedShowGrid] = useState(true);
+  const [appliedScene, setAppliedScene] = useState('studio_v2');
+  const [appliedShowBackground, setAppliedShowBackground] = useState(false);
+  const [appliedWinterMode, setAppliedWinterMode] = useState(false);
+  const [appliedSpringMode, setAppliedSpringMode] = useState(false);
   const [appliedCameraOffsetX, setAppliedCameraOffsetX] = useState(0);
   const [appliedGridSettings, setAppliedGridSettings] = useState({
     cellThickness: 1.0,
@@ -83,6 +105,10 @@ function BuildViewer({ apiConfig }) {
     (useCustomResolution && (width !== appliedWidth || height !== appliedHeight)) ||
     profile !== appliedProfile ||
     showGrid !== appliedShowGrid ||
+    scene !== appliedScene ||
+    showBackground !== appliedShowBackground ||
+    winterMode !== appliedWinterMode ||
+    springMode !== appliedSpringMode ||
     cameraOffsetX !== appliedCameraOffsetX ||
     cameraZoom !== appliedCameraZoom ||
     useCustomGridSettings !== appliedUseCustomGridSettings ||
@@ -97,6 +123,10 @@ function BuildViewer({ apiConfig }) {
     setAppliedCustomResolution(useCustomResolution);
     setAppliedProfile(profile);
     setAppliedShowGrid(showGrid);
+    setAppliedScene(scene);
+    setAppliedShowBackground(showBackground);
+    setAppliedWinterMode(winterMode);
+    setAppliedSpringMode(springMode);
     setAppliedCameraOffsetX(cameraOffsetX);
     setAppliedCameraZoom(cameraZoom);
     setAppliedUseCustomGridSettings(useCustomGridSettings);
@@ -171,6 +201,10 @@ function BuildViewer({ apiConfig }) {
       setAppliedCustomResolution(useCustomResolution);
       setAppliedProfile(profile);
       setAppliedShowGrid(showGrid);
+      setAppliedScene(scene);
+      setAppliedShowBackground(showBackground);
+      setAppliedWinterMode(winterMode);
+      setAppliedSpringMode(springMode);
       setAppliedCameraOffsetX(cameraOffsetX);
       setAppliedCameraZoom(cameraZoom);
       setAppliedUseCustomGridSettings(useCustomGridSettings);
@@ -182,7 +216,7 @@ function BuildViewer({ apiConfig }) {
     } finally {
       setLoadingBuild(false);
     }
-  }, [shareCodeInput, apiConfig, width, height, useCustomResolution, profile, showGrid, cameraOffsetX, cameraZoom, useCustomGridSettings, currentGridSettings, frameQuality]);
+  }, [shareCodeInput, apiConfig, width, height, useCustomResolution, profile, showGrid, scene, showBackground, winterMode, springMode, cameraOffsetX, cameraZoom, useCustomGridSettings, currentGridSettings, frameQuality]);
 
   // Handle Enter key in share code input
   const handleKeyDown = (e) => {
@@ -344,6 +378,69 @@ function BuildViewer({ apiConfig }) {
               />
               <span className="toggle-slider"></span>
               <span className="toggle-label">Show Grid</span>
+            </label>
+          </div>
+
+          <div className="quality-select-container">
+            <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Scene</label>
+            <select
+              value={scene}
+              onChange={(e) => setScene(e.target.value)}
+              className="quality-select"
+            >
+              {SCENE_OPTIONS.map((sceneOption) => (
+                <option key={sceneOption} value={sceneOption}>
+                  {sceneOption}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="composition-row">
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={showBackground}
+                onChange={(e) => setShowBackground(e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+              <span className="toggle-label">Show Background</span>
+            </label>
+          </div>
+
+          <div className="composition-row">
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={winterMode}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setWinterMode(checked);
+                  if (checked) {
+                    setSpringMode(false);
+                  }
+                }}
+              />
+              <span className="toggle-slider"></span>
+              <span className="toggle-label">Winter Mode</span>
+            </label>
+          </div>
+
+          <div className="composition-row">
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={springMode}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setSpringMode(checked);
+                  if (checked) {
+                    setWinterMode(false);
+                  }
+                }}
+              />
+              <span className="toggle-slider"></span>
+              <span className="toggle-label">Spring Mode</span>
             </label>
           </div>
           
@@ -541,6 +638,10 @@ function BuildViewer({ apiConfig }) {
                   touchSensitivity={0.2}
                   apiConfig={apiConfig}
                   showGrid={appliedShowGrid}
+                  scene={appliedScene}
+                  showBackground={appliedShowBackground}
+                  winterMode={appliedWinterMode}
+                  springMode={appliedSpringMode}
                   cameraOffsetX={appliedCameraOffsetX}
                   cameraZoom={appliedCameraZoom}
                   gridSettings={appliedUseCustomGridSettings ? appliedGridSettings : undefined}
@@ -566,6 +667,11 @@ function BuildViewer({ apiConfig }) {
                 </p>
                 <p className="composition-info">
                   Grid: <strong>{appliedShowGrid ? 'On' : 'Off'}</strong>
+                  <span> • Scene: <strong>{appliedScene}</strong></span>
+                  <span> • Background: <strong>{appliedShowBackground ? 'On' : 'Off'}</strong></span>
+                  {(appliedWinterMode || appliedSpringMode) && (
+                    <span> • Season: <strong>{appliedWinterMode ? 'Winter' : 'Spring'}</strong></span>
+                  )}
                   {appliedCameraOffsetX !== 0 && (
                     <span> • Offset: <strong>{appliedCameraOffsetX > 0 ? 'Right' : 'Left'}</strong></span>
                   )}

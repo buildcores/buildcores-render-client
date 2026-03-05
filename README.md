@@ -45,6 +45,33 @@ function App() {
 }
 ```
 
+## 🔐 Authentication Modes
+
+`@buildcores/render-client` supports two auth modes:
+
+- `legacy` (backward-compatible): sends a long-lived API key from `apiConfig.authToken`.
+- `session` (recommended): fetches short-lived delegated tokens from your backend via `apiConfig.getRenderSessionToken`.
+
+```tsx
+const apiConfig = {
+  environment: "prod",
+  authMode: "session",
+  getRenderSessionToken: async () => {
+    // Your backend endpoint should broker BuildCores /auth/render-session
+    const res = await fetch("/buildcores/session", { method: "POST" });
+    if (!res.ok) throw new Error("Failed to mint BuildCores session");
+    const data = await res.json();
+    return {
+      token: data.session_token,
+      expiresAt: data.expires_at,
+    };
+  },
+};
+```
+
+Legacy browser API key flow is deprecated and should only be used for temporary compatibility.
+`/render-build-experimental` behavior is unchanged.
+
 ## 🔧 API Reference
 
 ### `BuildRender` Component
@@ -72,6 +99,11 @@ interface RenderBuildRequest {
   format?: "video" | "sprite";
   width?: number;  // Optional: Canvas pixel width (256-2000)
   height?: number; // Optional: Canvas pixel height (256-2000)
+  scene?: "sunset" | "dawn" | "night" | "warehouse" | "forest" | "apartment" | "studio" | "studio_v2" | "city" | "park" | "lobby";
+  showBackground?: boolean;
+  showGrid?: boolean;
+  winterMode?: boolean; // mutually exclusive with springMode
+  springMode?: boolean; // mutually exclusive with winterMode
 }
 
 // Available part categories
@@ -90,6 +122,8 @@ enum PartCategory {
 **Current Limitation**: Each category array must contain exactly one part ID. Multiple parts per category will be supported in future versions.
 
 **Resolution Control**: You can specify custom `width` and `height` (both must be provided together, 256-2000 pixels) for higher or lower quality renders. If not specified, the default resolution is used.
+
+**Environment Controls**: You can configure `scene`, `showBackground`, `showGrid`, and seasonal toggles (`winterMode` / `springMode`) for async render endpoints.
 
 #### Examples
 

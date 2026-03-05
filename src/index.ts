@@ -15,6 +15,7 @@ export type {
   RenderByShareCodeOptions,
   RenderByShareCodeJobResponse,
   RenderByShareCodeResponse,
+  RenderScene,
   GridSettings,
 } from "./types";
 export { PartCategory } from "./types";
@@ -51,4 +52,6 @@ export {
   type RenderAPIService,
   type RenderBuildResponse,
   type RenderSpriteResponse,
+  type RenderJobCreateResponse,
+  type RenderJobStatusResponse,
 } from "./api";

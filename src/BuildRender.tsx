@@ -20,6 +20,10 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   mouseSensitivity = 0.2,
   touchSensitivity = 0.2,
   showGrid,
+  scene,
+  showBackground,
+  winterMode,
+  springMode,
   cameraOffsetX,
   cameraZoom,
   gridSettings,
@@ -40,28 +44,46 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
 
   // Build the render input - prefer shareCode if provided (preserves interactive state like case fan slots)
   const renderInput: SpriteRenderInput = useMemo(() => {
+    const resolvedShowGrid = showGrid ?? parts?.showGrid;
+    const resolvedScene = scene ?? parts?.scene;
+    const resolvedShowBackground = showBackground ?? parts?.showBackground;
+    const resolvedWinterMode = winterMode ?? parts?.winterMode;
+    const resolvedSpringMode = springMode ?? parts?.springMode;
+    const resolvedCameraOffsetX = cameraOffsetX ?? parts?.cameraOffsetX;
+    const resolvedCameraZoom = cameraZoom ?? parts?.cameraZoom;
+    const resolvedGridSettings = gridSettings ?? parts?.gridSettings;
+    const resolvedFrameQuality = frameQuality ?? parts?.frameQuality;
+
     if (shareCode) {
       return { 
         type: 'shareCode', 
         shareCode, 
         profile: parts?.profile,
-        showGrid,
-        cameraOffsetX,
-        cameraZoom,
-        gridSettings,
-        frameQuality,
+        showGrid: resolvedShowGrid,
+        scene: resolvedScene,
+        showBackground: resolvedShowBackground,
+        winterMode: resolvedWinterMode,
+        springMode: resolvedSpringMode,
+        cameraOffsetX: resolvedCameraOffsetX,
+        cameraZoom: resolvedCameraZoom,
+        gridSettings: resolvedGridSettings,
+        frameQuality: resolvedFrameQuality,
       };
     }
     return { 
       type: 'parts', 
       parts: parts!,
-      showGrid,
-      cameraOffsetX,
-      cameraZoom,
-      gridSettings,
-      frameQuality,
+      showGrid: resolvedShowGrid,
+      scene: resolvedScene,
+      showBackground: resolvedShowBackground,
+      winterMode: resolvedWinterMode,
+      springMode: resolvedSpringMode,
+      cameraOffsetX: resolvedCameraOffsetX,
+      cameraZoom: resolvedCameraZoom,
+      gridSettings: resolvedGridSettings,
+      frameQuality: resolvedFrameQuality,
     };
-  }, [shareCode, parts, showGrid, cameraOffsetX, cameraZoom, gridSettings, frameQuality]);
+  }, [shareCode, parts, showGrid, scene, showBackground, winterMode, springMode, cameraOffsetX, cameraZoom, gridSettings, frameQuality]);
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =

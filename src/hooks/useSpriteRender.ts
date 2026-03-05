@@ -42,6 +42,10 @@ export type SpriteRenderInput =
       type: 'parts'; 
       parts: RenderBuildRequest;
       showGrid?: boolean;
+      scene?: RenderBuildRequest["scene"];
+      showBackground?: boolean;
+      winterMode?: boolean;
+      springMode?: boolean;
       cameraOffsetX?: number;
       cameraZoom?: number;
       gridSettings?: RenderGridSettings;
@@ -52,6 +56,10 @@ export type SpriteRenderInput =
       shareCode: string; 
       profile?: 'cinematic' | 'flat' | 'fast';
       showGrid?: boolean;
+      scene?: RenderBuildRequest["scene"];
+      showBackground?: boolean;
+      winterMode?: boolean;
+      springMode?: boolean;
       cameraOffsetX?: number;
       cameraZoom?: number;
       gridSettings?: RenderGridSettings;
@@ -76,7 +84,21 @@ export const useSpriteRender = (
 
   // Normalize input to SpriteRenderInput format
   const normalizedInput: SpriteRenderInput = 
-    'type' in input ? input : { type: 'parts', parts: input };
+    'type' in input
+      ? input
+      : {
+          type: 'parts',
+          parts: input,
+          showGrid: input.showGrid,
+          scene: input.scene,
+          showBackground: input.showBackground,
+          winterMode: input.winterMode,
+          springMode: input.springMode,
+          cameraOffsetX: input.cameraOffsetX,
+          cameraZoom: input.cameraZoom,
+          gridSettings: input.gridSettings,
+          frameQuality: input.frameQuality
+        };
 
   const fetchRenderSprite = useCallback(
     async (currentInput: SpriteRenderInput) => {
@@ -94,6 +116,10 @@ export const useSpriteRender = (
               format: 'sprite', 
               profile: currentInput.profile,
               showGrid: currentInput.showGrid,
+              scene: currentInput.scene,
+              showBackground: currentInput.showBackground,
+              winterMode: currentInput.winterMode,
+              springMode: currentInput.springMode,
               cameraOffsetX: currentInput.cameraOffsetX,
               cameraZoom: currentInput.cameraZoom,
               gridSettings: currentInput.gridSettings,
@@ -126,6 +152,10 @@ export const useSpriteRender = (
             {
               ...currentParts,
               showGrid: currentInput.showGrid,
+              scene: currentInput.scene,
+              showBackground: currentInput.showBackground,
+              winterMode: currentInput.winterMode,
+              springMode: currentInput.springMode,
               cameraOffsetX: currentInput.cameraOffsetX,
               cameraZoom: currentInput.cameraZoom,
               gridSettings: currentInput.gridSettings,
@@ -156,6 +186,10 @@ export const useSpriteRender = (
               ...currentParts, 
               format: "sprite",
               showGrid: currentInput.showGrid,
+              scene: currentInput.scene,
+              showBackground: currentInput.showBackground,
+              winterMode: currentInput.winterMode,
+              springMode: currentInput.springMode,
               cameraOffsetX: currentInput.cameraOffsetX,
               cameraZoom: currentInput.cameraZoom,
               gridSettings: currentInput.gridSettings,
@@ -196,6 +230,10 @@ export const useSpriteRender = (
       return a.shareCode === b.shareCode && 
              a.profile === b.profile &&
              a.showGrid === b.showGrid &&
+             a.scene === b.scene &&
+             a.showBackground === b.showBackground &&
+             a.winterMode === b.winterMode &&
+             a.springMode === b.springMode &&
              a.cameraOffsetX === b.cameraOffsetX &&
              a.cameraZoom === b.cameraZoom &&
              a.frameQuality === b.frameQuality &&
@@ -207,6 +245,10 @@ export const useSpriteRender = (
         JSON.stringify(a.gridSettings ?? {}) === JSON.stringify(b.gridSettings ?? {});
       return arePartsEqual(a.parts, b.parts) &&
              a.showGrid === b.showGrid &&
+             a.scene === b.scene &&
+             a.showBackground === b.showBackground &&
+             a.winterMode === b.winterMode &&
+             a.springMode === b.springMode &&
              a.cameraOffsetX === b.cameraOffsetX &&
              a.cameraZoom === b.cameraZoom &&
              a.frameQuality === b.frameQuality &&
