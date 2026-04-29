@@ -1,0 +1,9 @@
+title: BuildCores API Docs
+description: Product and technical documentation for the BuildCores rendering API.
+url: https://buildcores.github.io
+baseurl: /buildcores-render-client
+markdown: kramdown
+kramdown:
+  input: GFM
+permalink: pretty
+

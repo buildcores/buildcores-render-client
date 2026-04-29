@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page.title }} | {{ site.title }}</title>
+    <meta name="description" content="{{ page.description | default: site.description }}">
+    <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="{{ '/' | relative_url }}" aria-label="BuildCores API Docs home">
+        <img src="{{ '/assets/images/buildcores-logo.png' | relative_url }}" alt="" width="34" height="34">
+        <span>BuildCores API Docs</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="{{ '/product-whitepaper/' | relative_url }}">Product</a>
+        <a href="{{ '/technical-documentation/' | relative_url }}">Technical</a>
+        <a href="https://www.buildcores.com/api">Contact</a>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      {{ content }}
+    </main>
+
+    <footer class="site-footer">
+      <span>BuildCores rendering documentation</span>
+      <a href="https://github.com/buildcores/buildcores-render-client">@buildcores/render-client</a>
+    </footer>
+  </body>
+</html>
+
