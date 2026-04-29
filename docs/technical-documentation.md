@@ -1,28 +1,14 @@
 ---
-layout: default
 title: 3D Configurator API 2.0
 description: Current technical documentation for the BuildCores Render API and @buildcores/render-client.
+sidebar_position: 3
 ---
 
-<article class="content" markdown="1">
+import renderApiFlow from "@site/static/assets/images/render-api-flow.png";
 
 # BuildCores 3D Configurator API: Technical Documentation
 
 Version 2.0.
-
-<div class="toc">
-  <strong>Contents</strong>
-  <ul>
-    <li><a href="#1-high-level-overview">High-Level Overview</a></li>
-    <li><a href="#2-authentication">Authentication</a></li>
-    <li><a href="#3-frontend-integration-buildcoresrender-client">Frontend Integration</a></li>
-    <li><a href="#4-backend-api-reference">Backend API Reference</a></li>
-    <li><a href="#5-render-options-reference">Render Options Reference</a></li>
-    <li><a href="#6-full-integration-example">Full Integration Example</a></li>
-    <li><a href="#7-error-codes">Error Codes</a></li>
-    <li><a href="#8-technical-support">Technical Support</a></li>
-  </ul>
-</div>
 
 ## 1. High-Level Overview
 
@@ -32,10 +18,10 @@ as interactive 360-degree renders. The BuildCores 3D Configurator API exposes:
 - A backend REST API for fetching renderable part data, fetching existing build data, and creating cloud-rendered 3D build assets as video or sprite-sheet media.
 - A frontend React component library, `@buildcores/render-client`, for embedding drag-to-rotate viewers in partner sites and applications.
 
-<div class="wide-image">
-  <img src="{{ '/assets/images/render-api-flow.png' | relative_url }}" alt="BuildCores Render API integration flow">
-  <p class="caption">Render API and <code>@buildcores/render-client</code> integration flow.</p>
-</div>
+<figure className="doc-figure">
+  <img src={renderApiFlow} alt="BuildCores Render API integration flow" />
+  <figcaption>Render API and <code>@buildcores/render-client</code> integration flow.</figcaption>
+</figure>
 
 ## 2. Authentication
 
@@ -161,7 +147,6 @@ render directly from part IDs or from an existing BuildCores share code.
 
 Render by part IDs:
 
-{% raw %}
 ```tsx
 import { BuildRender } from "@buildcores/render-client";
 
@@ -180,7 +165,6 @@ import { BuildRender } from "@buildcores/render-client";
   apiConfig={apiConfig}
 />;
 ```
-{% endraw %}
 
 Render by share code:
 
@@ -642,7 +626,6 @@ app.post("/api/buildcores-token", async (req, res) => {
 
 ### 6.2. Frontend React Integration
 
-{% raw %}
 ```tsx
 import {
   BuildRender,
@@ -692,7 +675,6 @@ export function PCViewer() {
   );
 }
 ```
-{% endraw %}
 
 ## 7. Error Codes
 
@@ -710,5 +692,3 @@ export function PCViewer() {
 - Health check: `GET /health`, no auth required, returns `{ "status": "ok" }`
 - Package: `@buildcores/render-client`
 - Support: contact BuildCores through the partner or API channel for onboarding, integration questions, issue escalation, and non-React integration guidance.
-
-</article>

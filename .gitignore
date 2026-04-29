@@ -1,5 +1,7 @@
 node_modules/
 dist/
+build/
+.docusaurus/
 *.log
 .DS_Store
 .env

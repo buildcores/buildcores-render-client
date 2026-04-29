@@ -1,0 +1,136 @@
+/**
+ * Global Docusaurus theme overrides. This mirrors the BuildCoresBase docs
+ * accent system while keeping this public API docs site a little lighter.
+ */
+
+:root {
+  --ifm-color-primary: #b300b3;
+  --ifm-color-primary-dark: #9d009d;
+  --ifm-color-primary-darker: #8f008f;
+  --ifm-color-primary-darkest: #6b006b;
+  --ifm-color-primary-light: #c900c9;
+  --ifm-color-primary-lighter: #d100d1;
+  --ifm-color-primary-lightest: #e500e5;
+  --ifm-code-font-size: 95%;
+  --ifm-navbar-height: 4rem;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #d100d6;
+  --ifm-color-primary-dark: #b300b8;
+  --ifm-color-primary-darker: #9d00a1;
+  --ifm-color-primary-darkest: #6b006e;
+  --ifm-color-primary-light: #e500ea;
+  --ifm-color-primary-lighter: #f000f5;
+  --ifm-color-primary-lightest: #ff00ff;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.navbar__logo img {
+  border-radius: 6px;
+}
+
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--ifm-toc-border-color);
+}
+
+.doc-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+.doc-hero h1 {
+  margin-bottom: 1rem;
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  line-height: 1.05;
+}
+
+.doc-hero__eyebrow {
+  margin-bottom: 0.75rem;
+  color: var(--ifm-color-primary);
+  font-size: 0.82rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.doc-hero__lead {
+  color: var(--ifm-color-emphasis-700);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+}
+
+.doc-hero img,
+.doc-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 8px;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 16px 40px rgba(20, 24, 35, 0.08);
+}
+
+.doc-hero img {
+  max-height: 560px;
+  object-fit: contain;
+}
+
+.doc-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.doc-card {
+  display: block;
+  padding: 1.25rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 8px;
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+}
+
+.doc-card:hover {
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+  border-color: var(--ifm-color-primary);
+}
+
+.doc-card strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1.1rem;
+}
+
+.doc-card span {
+  color: var(--ifm-color-emphasis-700);
+}
+
+.doc-figure {
+  margin: 1.75rem 0;
+}
+
+.doc-figure figcaption {
+  margin-top: 0.55rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.92rem;
+}
+
+.pricing-note {
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(179, 0, 179, 0.25);
+  border-radius: 8px;
+  background: rgba(179, 0, 179, 0.07);
+}
+
+@media (max-width: 760px) {
+  .doc-hero,
+  .doc-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

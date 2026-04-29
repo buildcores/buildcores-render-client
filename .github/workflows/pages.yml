@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - docs/**
+      - docs-portal/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -26,13 +27,22 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          source: ./docs
-          destination: ./_site
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs-portal/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: docs-portal
+      - name: Build with Docusaurus
+        run: npm run build
+        working-directory: docs-portal
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs-portal/build
 
   deploy:
     environment:
@@ -44,4 +54,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
