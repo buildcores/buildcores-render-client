@@ -161,6 +161,7 @@ render directly from part IDs or from an existing BuildCores share code.
 
 Render by part IDs:
 
+{% raw %}
 ```tsx
 import { BuildRender } from "@buildcores/render-client";
 
@@ -179,6 +180,7 @@ import { BuildRender } from "@buildcores/render-client";
   apiConfig={apiConfig}
 />;
 ```
+{% endraw %}
 
 Render by share code:
 
@@ -640,6 +642,7 @@ app.post("/api/buildcores-token", async (req, res) => {
 
 ### 6.2. Frontend React Integration
 
+{% raw %}
 ```tsx
 import {
   BuildRender,
@@ -689,6 +692,7 @@ export function PCViewer() {
   );
 }
 ```
+{% endraw %}
 
 ## 7. Error Codes
 
