@@ -28,7 +28,42 @@ const sidebars = {
         {
           type: "doc",
           id: "technical-documentation",
-          label: "3D Configurator API 2.0"
+          label: "Overview"
+        },
+        {
+          type: "doc",
+          id: "technical/authentication",
+          label: "Authentication"
+        },
+        {
+          type: "doc",
+          id: "technical/frontend-integration",
+          label: "Frontend Integration"
+        },
+        {
+          type: "doc",
+          id: "technical/backend-api-reference",
+          label: "Backend API Reference"
+        },
+        {
+          type: "doc",
+          id: "technical/render-options",
+          label: "Render Options"
+        },
+        {
+          type: "doc",
+          id: "technical/full-integration-example",
+          label: "Full Integration Example"
+        },
+        {
+          type: "doc",
+          id: "technical/error-codes",
+          label: "Error Codes"
+        },
+        {
+          type: "doc",
+          id: "technical/technical-support",
+          label: "Technical Support"
         }
       ]
     }
