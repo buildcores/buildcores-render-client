@@ -1,5 +1,7 @@
 # @buildcores/render-client
 
+[Documentation](https://buildcores.github.io/buildcores-render-client/) | [Technical API Docs](https://buildcores.github.io/buildcores-render-client/technical-documentation/)
+
 A React component library for interactive 360-degree PC build rendering with drag-to-scrub functionality. Create immersive 3D visualizations of computer builds that users can rotate and explore.
 
 <img src="./render-preview.png" alt="BuildRender Component" width="400">
