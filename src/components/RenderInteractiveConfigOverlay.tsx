@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { RotateCcw, Settings, X } from "lucide-react";
 import { RenderInteractiveConfigBuilder } from "./RenderInteractiveConfigBuilder";
-import { ApiConfig, RenderBuildRequest, RenderInteractiveConfig, RenderInteractiveConfigTheme } from "../types";
+import {
+  ApiConfig,
+  RenderBuildRequest,
+  RenderInteractiveConfig,
+  RenderInteractiveConfigPanelHeight,
+  RenderInteractiveConfigPanelPosition,
+  RenderInteractiveConfigTheme,
+} from "../types";
 import { stableStringify } from "../utils/stableStringify";
 import {
   getInteractiveConfigThemeVariables,
@@ -17,7 +24,13 @@ export interface RenderInteractiveConfigOverlayProps {
   title?: string;
   buttonLabel?: string;
   theme?: RenderInteractiveConfigTheme;
+  panelPosition?: RenderInteractiveConfigPanelPosition;
+  panelHeight?: RenderInteractiveConfigPanelHeight;
 }
+
+const PANEL_OFFSET_PX = 12;
+const COMPACT_PANEL_HEIGHT_PX = 560;
+const MAX_PANEL_HEIGHT = `calc(100vh - ${PANEL_OFFSET_PX * 2}px)`;
 
 const styles: Record<string, React.CSSProperties> = {
   button: {
@@ -44,12 +57,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   panel: {
     position: "fixed",
-    left: 12,
-    top: 12,
-    bottom: 12,
     zIndex: 1000,
     width: "min(440px, calc(100vw - 24px))",
-    maxHeight: "calc(100vh - 24px)",
+    maxHeight: MAX_PANEL_HEIGHT,
     display: "grid",
     gridTemplateRows: "auto minmax(0, 1fr) auto",
     overflow: "hidden",
@@ -128,6 +138,41 @@ function cloneConfig(config: RenderInteractiveConfig | undefined): RenderInterac
   return config ? JSON.parse(JSON.stringify(config)) : {};
 }
 
+function getPanelPositionStyle(position: RenderInteractiveConfigPanelPosition): React.CSSProperties {
+  switch (position) {
+    case "top-right":
+      return { top: PANEL_OFFSET_PX, right: PANEL_OFFSET_PX };
+    case "bottom-left":
+      return { bottom: PANEL_OFFSET_PX, left: PANEL_OFFSET_PX };
+    case "bottom-right":
+      return { bottom: PANEL_OFFSET_PX, right: PANEL_OFFSET_PX };
+    case "top-left":
+    default:
+      return { top: PANEL_OFFSET_PX, left: PANEL_OFFSET_PX };
+  }
+}
+
+function getPanelHeightStyle(height: RenderInteractiveConfigPanelHeight): React.CSSProperties {
+  if (height === "compact") {
+    return {
+      height: COMPACT_PANEL_HEIGHT_PX,
+      maxHeight: MAX_PANEL_HEIGHT,
+    };
+  }
+
+  if (height === "max") {
+    return {
+      height: MAX_PANEL_HEIGHT,
+      maxHeight: MAX_PANEL_HEIGHT,
+    };
+  }
+
+  return {
+    height: typeof height === "number" ? `${height}px` : height,
+    maxHeight: MAX_PANEL_HEIGHT,
+  };
+}
+
 export const RenderInteractiveConfigOverlay: React.FC<RenderInteractiveConfigOverlayProps> = ({
   parts,
   apiConfig,
@@ -137,6 +182,8 @@ export const RenderInteractiveConfigOverlay: React.FC<RenderInteractiveConfigOve
   title = "Inventory",
   buttonLabel = "Configure build",
   theme = "system",
+  panelPosition = "top-left",
+  panelHeight = "max",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [draftConfig, setDraftConfig] = useState<RenderInteractiveConfig>(() => cloneConfig(value));
@@ -184,11 +231,18 @@ export const RenderInteractiveConfigOverlay: React.FC<RenderInteractiveConfigOve
 
       {isOpen && (
         <div
-          style={{ ...getInteractiveConfigThemeVariables(resolvedTheme), ...styles.panel }}
+          style={{
+            ...getInteractiveConfigThemeVariables(resolvedTheme),
+            ...styles.panel,
+            ...getPanelPositionStyle(panelPosition),
+            ...getPanelHeightStyle(panelHeight),
+          }}
           role="dialog"
           aria-modal="false"
           aria-label={title}
           data-buildcores-config-panel="true"
+          data-buildcores-config-position={panelPosition}
+          data-buildcores-config-height={String(panelHeight)}
           data-buildcores-config-theme={resolvedTheme}
           data-testid="render-config-panel"
           onMouseDown={(event) => event.stopPropagation()}

@@ -47,10 +47,11 @@ export type SpriteRenderInput =
       showBackground?: boolean;
       winterMode?: boolean;
       springMode?: boolean;
-      cameraOffsetX?: number;
-      cameraZoom?: number;
-      gridSettings?: RenderGridSettings;
-      frameQuality?: 'standard' | 'high';
+	      cameraOffsetX?: number;
+	      cameraZoom?: number;
+	      modelQuality?: RenderBuildRequest["modelQuality"];
+	      gridSettings?: RenderGridSettings;
+	      frameQuality?: 'standard' | 'high';
     }
   | { 
       type: 'shareCode'; 
@@ -61,10 +62,11 @@ export type SpriteRenderInput =
       showBackground?: boolean;
       winterMode?: boolean;
       springMode?: boolean;
-      cameraOffsetX?: number;
-      cameraZoom?: number;
-      gridSettings?: RenderGridSettings;
-      frameQuality?: 'standard' | 'high';
+	      cameraOffsetX?: number;
+	      cameraZoom?: number;
+	      modelQuality?: RenderBuildRequest["modelQuality"];
+	      gridSettings?: RenderGridSettings;
+	      frameQuality?: 'standard' | 'high';
     };
 
 export const useSpriteRender = (
@@ -96,9 +98,10 @@ export const useSpriteRender = (
           showBackground: input.showBackground,
           winterMode: input.winterMode,
           springMode: input.springMode,
-          cameraOffsetX: input.cameraOffsetX,
-          cameraZoom: input.cameraZoom,
-          gridSettings: input.gridSettings,
+	          cameraOffsetX: input.cameraOffsetX,
+	          cameraZoom: input.cameraZoom,
+	          modelQuality: input.modelQuality,
+	          gridSettings: input.gridSettings,
           frameQuality: input.frameQuality
         };
 
@@ -122,10 +125,11 @@ export const useSpriteRender = (
               showBackground: currentInput.showBackground,
               winterMode: currentInput.winterMode,
               springMode: currentInput.springMode,
-              cameraOffsetX: currentInput.cameraOffsetX,
-              cameraZoom: currentInput.cameraZoom,
-              gridSettings: currentInput.gridSettings,
-              frameQuality: currentInput.frameQuality
+	              cameraOffsetX: currentInput.cameraOffsetX,
+	              cameraZoom: currentInput.cameraZoom,
+	              modelQuality: currentInput.modelQuality,
+	              gridSettings: currentInput.gridSettings,
+	              frameQuality: currentInput.frameQuality
             }
           );
 
@@ -159,9 +163,10 @@ export const useSpriteRender = (
               showBackground: currentInput.showBackground,
               winterMode: currentInput.winterMode,
               springMode: currentInput.springMode,
-              cameraOffsetX: currentInput.cameraOffsetX,
-              cameraZoom: currentInput.cameraZoom,
-              gridSettings: currentInput.gridSettings,
+	              cameraOffsetX: currentInput.cameraOffsetX,
+	              cameraZoom: currentInput.cameraZoom,
+	              modelQuality: currentInput.modelQuality,
+	              gridSettings: currentInput.gridSettings,
               frameQuality,
             },
             apiConfig
@@ -194,9 +199,10 @@ export const useSpriteRender = (
               showBackground: currentInput.showBackground,
               winterMode: currentInput.winterMode,
               springMode: currentInput.springMode,
-              cameraOffsetX: currentInput.cameraOffsetX,
-              cameraZoom: currentInput.cameraZoom,
-              gridSettings: currentInput.gridSettings,
+	              cameraOffsetX: currentInput.cameraOffsetX,
+	              cameraZoom: currentInput.cameraZoom,
+	              modelQuality: currentInput.modelQuality,
+	              gridSettings: currentInput.gridSettings,
               frameQuality,
             },
             apiConfig
@@ -238,9 +244,10 @@ export const useSpriteRender = (
              a.showBackground === b.showBackground &&
              a.winterMode === b.winterMode &&
              a.springMode === b.springMode &&
-             a.cameraOffsetX === b.cameraOffsetX &&
-             a.cameraZoom === b.cameraZoom &&
-             a.frameQuality === b.frameQuality &&
+	             a.cameraOffsetX === b.cameraOffsetX &&
+	             a.cameraZoom === b.cameraZoom &&
+	             a.modelQuality === b.modelQuality &&
+	             a.frameQuality === b.frameQuality &&
              gridSettingsEqual;
     }
     if (a.type === 'parts' && b.type === 'parts') {
@@ -254,9 +261,10 @@ export const useSpriteRender = (
              a.showBackground === b.showBackground &&
              a.winterMode === b.winterMode &&
              a.springMode === b.springMode &&
-             a.cameraOffsetX === b.cameraOffsetX &&
-             a.cameraZoom === b.cameraZoom &&
-             a.frameQuality === b.frameQuality &&
+	             a.cameraOffsetX === b.cameraOffsetX &&
+	             a.cameraZoom === b.cameraZoom &&
+	             a.modelQuality === b.modelQuality &&
+	             a.frameQuality === b.frameQuality &&
              gridSettingsEqual;
     }
     return false;

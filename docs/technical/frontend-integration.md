@@ -100,6 +100,7 @@ Component props:
 | `interactive` | boolean | `true` | Enables drag-to-rotate and scroll-to-zoom. Set `false` for non-interactive showcase embeds. |
 | `zoom` | number | `1` | Client-side initial zoom level. Intended range is `0.5` to `2.5`. |
 | `cameraZoom` | number | `1` | Server-side camera distance. Values are clamped from `0.5` to `2.0`. |
+| `modelQuality` | `"low" \| "medium" \| "high"` | API default | 3D model asset quality for server renders. Can also be supplied as `parts.modelQuality`. |
 | `showGrid` | boolean | profile-dependent | Show the 3D ground grid. |
 | `scene` | `RenderScene` | - | Environment scene preset. |
 | `showBackground` | boolean | - | Show the environment background. |
@@ -109,6 +110,10 @@ Component props:
 | `gridSettings` | `GridSettings` | - | Custom grid appearance settings. |
 | `frameQuality` | `"standard" \| "high"` | `"standard"` | `standard` renders 72 frames; `high` renders 144 frames. |
 | `useSpriteRenderOptions.mode` | `"async" \| "experimental"` | `"async"` | Selects async job rendering or the legacy pregenerated endpoint. |
+| `showInteractiveConfigButton` | boolean | `false` | Show the embedded fan, radiator, RGB, and side-panel configuration menu for parts-based async renders. |
+| `interactiveConfigTheme` | `"light" \| "dark" \| "system"` | `"system"` | Theme for the embedded configuration menu. |
+| `interactiveConfigPanelPosition` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | `"top-left"` | Corner where the embedded configuration menu opens. |
+| `interactiveConfigPanelHeight` | `"compact" \| "max" \| number \| string` | `"max"` | Height for the embedded configuration menu. Numbers are treated as pixels; strings can be CSS heights. |
 
 ## 3.3. API Functions
 

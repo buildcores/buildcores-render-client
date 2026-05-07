@@ -18,6 +18,7 @@ function getComparableRenderOptions(parts: RenderBuildRequest) {
     gridSettings: parts.gridSettings,
     frameQuality: parts.frameQuality,
     cameraZoom: parts.cameraZoom,
+    modelQuality: parts.modelQuality,
     interactiveConfig: parts.interactiveConfig,
   };
 }

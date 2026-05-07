@@ -67,6 +67,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   springMode,
   cameraOffsetX,
   cameraZoom,
+  modelQuality,
   gridSettings,
   animationMode = 'bounce',
   spinDuration = 10000,
@@ -81,6 +82,8 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   interactiveConfigButtonLabel,
   interactiveConfigPanelTitle,
   interactiveConfigTheme,
+  interactiveConfigPanelPosition,
+  interactiveConfigPanelHeight,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -142,6 +145,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     const resolvedSpringMode = springMode ?? renderParts?.springMode;
     const resolvedCameraOffsetX = cameraOffsetX ?? renderParts?.cameraOffsetX;
     const resolvedCameraZoom = cameraZoom ?? renderParts?.cameraZoom;
+    const resolvedModelQuality = modelQuality ?? renderParts?.modelQuality;
     const resolvedGridSettings = gridSettings ?? renderParts?.gridSettings;
     const resolvedFrameQuality = frameQuality ?? renderParts?.frameQuality;
 
@@ -157,6 +161,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
         springMode: resolvedSpringMode,
         cameraOffsetX: resolvedCameraOffsetX,
         cameraZoom: resolvedCameraZoom,
+        modelQuality: resolvedModelQuality,
         gridSettings: resolvedGridSettings,
         frameQuality: resolvedFrameQuality,
       };
@@ -172,10 +177,11 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       springMode: resolvedSpringMode,
       cameraOffsetX: resolvedCameraOffsetX,
       cameraZoom: resolvedCameraZoom,
+      modelQuality: resolvedModelQuality,
       gridSettings: resolvedGridSettings,
       frameQuality: resolvedFrameQuality,
     };
-  }, [shareCode, renderParts, showGrid, profile, scene, showBackground, winterMode, springMode, cameraOffsetX, cameraZoom, gridSettings, frameQuality]);
+  }, [shareCode, renderParts, showGrid, profile, scene, showBackground, winterMode, springMode, cameraOffsetX, cameraZoom, modelQuality, gridSettings, frameQuality]);
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
@@ -503,6 +509,8 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
           buttonLabel={interactiveConfigButtonLabel}
           title={interactiveConfigPanelTitle}
           theme={interactiveConfigTheme}
+          panelPosition={interactiveConfigPanelPosition}
+          panelHeight={interactiveConfigPanelHeight}
         />
       )}
     </div>

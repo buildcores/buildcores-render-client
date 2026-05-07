@@ -179,6 +179,21 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 13,
     textAlign: "center",
   },
+  loadingState: {
+    border: "1px solid var(--bcrc-border-soft)",
+    borderRadius: 6,
+    background: "var(--bcrc-surface-muted)",
+    padding: "18px 12px",
+    display: "grid",
+    gap: 6,
+    justifyItems: "center",
+    textAlign: "center",
+  },
+  loadingTitle: {
+    color: "var(--bcrc-text)",
+    fontSize: 14,
+    fontWeight: 650,
+  },
   slotList: {
     display: "grid",
     gap: 8,
@@ -668,6 +683,8 @@ export const RenderInteractiveConfigBuilder: React.FC<RenderInteractiveConfigBui
   const rgbConfig = config.rgb ?? options?.defaultConfig.rgb ?? {};
   const showSidePanel = config.showSidePanel ?? true;
   const hasInventory = fanOptions.length > 0 || coolerOptions.length > 0;
+  const isInitialLoading = !options && !error;
+  const isRefreshing = isLoading && !!options;
 
   const emit = (nextConfig: RenderInteractiveConfig) => {
     onChange(nextConfig);
@@ -925,103 +942,114 @@ export const RenderInteractiveConfigBuilder: React.FC<RenderInteractiveConfigBui
       data-buildcores-config-theme={resolvedTheme}
       data-testid="render-config-builder"
     >
-      {isLoading && <span style={styles.muted}>Loading case slots...</span>}
-      {error && <span style={styles.warning}>{error}</span>}
-      {!isLoading && !error && options && options.slots.length === 0 && (
-        <span style={styles.empty}>No interactive slots are available for these parts.</span>
-      )}
-
-      {options?.warnings?.length ? (
-        <Section title="Warnings">
-          {options.warnings.map((warning) => (
-            <div key={warning} style={styles.warning}>
-              {warning}
-            </div>
-          ))}
-        </Section>
-      ) : null}
-
-      <div style={styles.toggleRow}>
-        <span>Show Side Panel</span>
-        <SidePanelSwitch checked={showSidePanel} disabled={disabled} onChange={setSidePanel} />
-      </div>
-
-      <Section title="Unplaced items">
-        {hasInventory ? (
-          <div style={styles.inventoryGrid}>
-            {coolerOptions.map((cooler) => (
-              <InventoryItem
-                key={cooler.partId}
-                part={cooler}
-                icon={<Cpu size={18} aria-hidden="true" />}
-                placements={radiatorPlacementTargets}
-                disabled={disabled}
-                onPlace={placeInventoryPart}
-              />
-            ))}
-            {fanOptions.map((fan) => (
-              <InventoryItem
-                key={fan.partId}
-                part={fan}
-                icon={<Fan size={18} aria-hidden="true" />}
-                placements={getFanPlacementTargets(fan.partId, caseFanSlots, radiatorSlots)}
-                disabled={disabled}
-                onPlace={placeInventoryPart}
-              />
-            ))}
-          </div>
-        ) : (
-          <div style={styles.empty}>No unplaced items</div>
-        )}
-      </Section>
-
-      {radiatorSlots.length || caseFanSlots.length ? (
-        <Section title="Case fan and radiator slots">
-          <div style={styles.slotList}>
-            {radiatorSlots.map(renderRadiatorFanSlot)}
-            {caseFanSlots.map(renderCaseSlot)}
-            {!radiatorSlots.length && !caseFanSlots.length ? <div style={styles.empty}>No configurable slots.</div> : null}
-          </div>
-        </Section>
-      ) : null}
-
-      {!radiatorMountSlots.length && coolerOptions.length > 0 ? (
-        <div style={styles.warning}>This case does not expose a supported radiator slot yet.</div>
-      ) : null}
-
-      <Section title="Lighting">
-        <div style={styles.lightingRow}>
-          <input
-            type="color"
-            value={rgbConfig.color ?? "#ffffff"}
-            disabled={disabled}
-            onChange={(event) => setRgb({ color: event.target.value })}
-            aria-label="RGB color"
-            style={{ width: 44, height: 36 }}
-          />
-          <select
-            value={rgbConfig.rgbPattern ?? "wave"}
-            disabled={disabled}
-            onChange={(event) => setRgb({ rgbPattern: event.target.value })}
-            style={styles.select}
-            aria-label="RGB pattern"
-          >
-            <option value="wave">Wave</option>
-            <option value="static">Static</option>
-            <option value="breathing">Breathing</option>
-          </select>
+      {isInitialLoading ? (
+        <div style={styles.loadingState} role="status" aria-live="polite">
+          <span style={styles.loadingTitle}>Loading case slots...</span>
+          <span style={styles.muted}>Checking compatible placements for this build.</span>
         </div>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={rgbConfig.brightness ?? 100}
-          disabled={disabled}
-          onChange={(event) => setRgb({ brightness: Number(event.target.value) })}
-          aria-label="RGB brightness"
-          style={styles.range}
-        />
-      </Section>
+      ) : null}
+      {isRefreshing && <span style={styles.muted}>Refreshing case slots...</span>}
+      {error && <span style={styles.warning}>{error}</span>}
+
+      {options ? (
+        <>
+          {!isLoading && !error && options.slots.length === 0 && (
+            <span style={styles.empty}>No interactive slots are available for these parts.</span>
+          )}
+
+          {options.warnings?.length ? (
+            <Section title="Warnings">
+              {options.warnings.map((warning) => (
+                <div key={warning} style={styles.warning}>
+                  {warning}
+                </div>
+              ))}
+            </Section>
+          ) : null}
+
+          <div style={styles.toggleRow}>
+            <span>Show Side Panel</span>
+            <SidePanelSwitch checked={showSidePanel} disabled={disabled} onChange={setSidePanel} />
+          </div>
+
+          <Section title="Unplaced items">
+            {hasInventory ? (
+              <div style={styles.inventoryGrid}>
+                {coolerOptions.map((cooler) => (
+                  <InventoryItem
+                    key={cooler.partId}
+                    part={cooler}
+                    icon={<Cpu size={18} aria-hidden="true" />}
+                    placements={radiatorPlacementTargets}
+                    disabled={disabled}
+                    onPlace={placeInventoryPart}
+                  />
+                ))}
+                {fanOptions.map((fan) => (
+                  <InventoryItem
+                    key={fan.partId}
+                    part={fan}
+                    icon={<Fan size={18} aria-hidden="true" />}
+                    placements={getFanPlacementTargets(fan.partId, caseFanSlots, radiatorSlots)}
+                    disabled={disabled}
+                    onPlace={placeInventoryPart}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div style={styles.empty}>No unplaced items</div>
+            )}
+          </Section>
+
+          {radiatorSlots.length || caseFanSlots.length ? (
+            <Section title="Case fan and radiator slots">
+              <div style={styles.slotList}>
+                {radiatorSlots.map(renderRadiatorFanSlot)}
+                {caseFanSlots.map(renderCaseSlot)}
+                {!radiatorSlots.length && !caseFanSlots.length ? <div style={styles.empty}>No configurable slots.</div> : null}
+              </div>
+            </Section>
+          ) : null}
+
+          {!radiatorMountSlots.length && coolerOptions.length > 0 ? (
+            <div style={styles.warning}>This case does not expose a supported radiator slot yet.</div>
+          ) : null}
+
+          <Section title="Lighting">
+            <div style={styles.lightingRow}>
+              <input
+                type="color"
+                value={rgbConfig.color ?? "#ffffff"}
+                disabled={disabled}
+                onChange={(event) => setRgb({ color: event.target.value })}
+                aria-label="RGB color"
+                style={{ width: 44, height: 36 }}
+              />
+              <select
+                value={rgbConfig.rgbPattern ?? "wave"}
+                disabled={disabled}
+                onChange={(event) => setRgb({ rgbPattern: event.target.value })}
+                style={styles.select}
+                aria-label="RGB pattern"
+              >
+                <option value="wave">Wave</option>
+                <option value="static">Static</option>
+                <option value="breathing">Breathing</option>
+              </select>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={rgbConfig.brightness ?? 100}
+              disabled={disabled}
+              onChange={(event) => setRgb({ brightness: Number(event.target.value) })}
+              aria-label="RGB brightness"
+              style={styles.range}
+            />
+          </Section>
+        </>
+      ) : null}
     </div>
   );
 };

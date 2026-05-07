@@ -134,9 +134,19 @@ export interface BuildRenderVideoProps {
 
   /** Camera zoom level for server-side rendering. */
   cameraZoom?: number;
+
+  /** 3D model asset quality used by the server renderer. */
+  modelQuality?: RenderModelQuality;
 }
 
 export type RenderInteractiveConfigTheme = "light" | "dark" | "system";
+export type RenderInteractiveConfigPanelPosition =
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right";
+export type RenderInteractiveConfigPanelHeight = "compact" | "max" | number | string;
+export type RenderModelQuality = "low" | "medium" | "high";
 
 export interface BuildRenderProps {
   /**
@@ -413,6 +423,11 @@ export interface BuildRenderProps {
   cameraZoom?: number;
 
   /**
+   * 3D model asset quality used by the server renderer. Overrides parts.modelQuality when provided.
+   */
+  modelQuality?: RenderModelQuality;
+
+  /**
    * Show a gear button in the bottom-right corner of the viewer that opens the
    * built-in fan, radiator, RGB, and side-panel configuration panel.
    *
@@ -466,6 +481,22 @@ export interface BuildRenderProps {
    * @default "system"
    */
   interactiveConfigTheme?: RenderInteractiveConfigTheme;
+
+  /**
+   * Screen corner where the embedded configuration panel opens.
+   *
+   * @default "top-left"
+   */
+  interactiveConfigPanelPosition?: RenderInteractiveConfigPanelPosition;
+
+  /**
+   * Height of the embedded configuration panel.
+   * Use "compact" for a shorter scrollable menu, "max" for viewport-height,
+   * or pass a CSS height string / pixel number for a custom value.
+   *
+   * @default "max"
+   */
+  interactiveConfigPanelHeight?: RenderInteractiveConfigPanelHeight;
 }
 
 // API Types
@@ -826,6 +857,14 @@ export interface RenderBuildRequest {
   cameraZoom?: number;
 
   /**
+   * 3D model asset quality used by the server renderer.
+   * - **low**: fastest loading, smaller assets
+   * - **medium**: balanced asset detail and load time
+   * - **high**: highest-detail model assets
+   */
+  modelQuality?: RenderModelQuality;
+
+  /**
    * Optional one-off interactive layout for case fans, radiator/cooler placement,
    * RGB lighting, and side-panel visibility.
    */
@@ -1068,6 +1107,8 @@ export interface RenderByShareCodeOptions {
   frameQuality?: RenderFrameQuality;
   /** Camera zoom level for rendering. Values > 1 move camera further (build appears smaller). Range: 0.5 to 2.0 */
   cameraZoom?: number;
+  /** 3D model asset quality used by the server renderer. */
+  modelQuality?: RenderModelQuality;
   /** Polling interval in milliseconds (default: 1500) */
   pollIntervalMs?: number;
   /** Timeout in milliseconds (default: 120000 = 2 minutes) */

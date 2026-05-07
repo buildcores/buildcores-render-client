@@ -306,6 +306,7 @@ export const createRenderBuildJob = async (
     ...(request.frameQuality ? { frameQuality: request.frameQuality } : {}),
     // Include camera zoom for render-time scaling
     ...(request.cameraZoom !== undefined ? { cameraZoom: request.cameraZoom } : {}),
+    ...(request.modelQuality ? { modelQuality: request.modelQuality } : {}),
     ...(request.interactiveConfig ? { interactiveConfig: request.interactiveConfig } : {}),
   };
 
@@ -623,6 +624,7 @@ export const createRenderByShareCodeJob = async (
     ...(options?.gridSettings ? { gridSettings: options.gridSettings } : {}),
     ...(options?.frameQuality ? { frameQuality: options.frameQuality } : {}),
     ...(options?.cameraZoom !== undefined ? { cameraZoom: options.cameraZoom } : {}),
+    ...(options?.modelQuality ? { modelQuality: options.modelQuality } : {}),
   };
 
   const response = await fetchWithApiAuth(
