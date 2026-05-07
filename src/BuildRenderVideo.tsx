@@ -18,6 +18,9 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   useBuildRenderOptions,
   mouseSensitivity = 0.01,
   touchSensitivity = 0.01,
+  profile,
+  frameQuality,
+  cameraZoom,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,10 +28,16 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
 
   const displayW = width ?? size ?? 300;
   const displayH = height ?? size ?? 300;
+  const renderParts = {
+    ...parts,
+    ...(profile ? { profile } : {}),
+    ...(frameQuality ? { frameQuality } : {}),
+    ...(cameraZoom !== undefined ? { cameraZoom } : {}),
+  };
 
   // Use custom hook for build rendering
   const { videoSrc, isRenderingBuild, renderError } = useBuildRender(
-    parts,
+    renderParts,
     apiConfig,
     undefined,
     useBuildRenderOptions

@@ -3,11 +3,51 @@ import { useSpriteScrubbing } from "./hooks/useSpriteScrubbing";
 import { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
 import { useContinuousSpin } from "./hooks/useContinuousSpin";
 import { useSpriteRender, SpriteRenderInput } from "./hooks/useSpriteRender";
-import { BuildRenderProps } from "./types";
+import { BuildRenderProps, RenderBuildRequest, RenderInteractiveConfig } from "./types";
 import { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";
 import { InstructionTooltip } from "./components/InstructionTooltip";
+import { RenderInteractiveConfigOverlay } from "./components/RenderInteractiveConfigOverlay";
 import { useZoomPan } from "./hooks/useZoomPan";
 import type { WheelEvent as ReactWheelEvent } from "react";
+
+function hasMeaningfulInteractiveValue(value: unknown): boolean {
+  if (Array.isArray(value)) {
+    return value.some(hasMeaningfulInteractiveValue);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).some(hasMeaningfulInteractiveValue);
+  }
+
+  return value !== undefined && value !== null && value !== "";
+}
+
+function hasInteractiveConfig(config: RenderInteractiveConfig | undefined): boolean {
+  return !!config && hasMeaningfulInteractiveValue(config);
+}
+
+function mergeInteractiveConfigIntoParts(
+  parts: RenderBuildRequest | undefined,
+  interactiveConfig: RenderInteractiveConfig | undefined
+): RenderBuildRequest | undefined {
+  if (!parts) {
+    return undefined;
+  }
+
+  if (!hasInteractiveConfig(interactiveConfig)) {
+    if (!parts.interactiveConfig) {
+      return parts;
+    }
+
+    const { interactiveConfig: _interactiveConfig, ...partsWithoutInteractiveConfig } = parts;
+    return partsWithoutInteractiveConfig;
+  }
+
+  return {
+    ...parts,
+    interactiveConfig,
+  };
+}
 
 export const BuildRender: React.FC<BuildRenderProps> = ({
   parts,
@@ -20,6 +60,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   mouseSensitivity = 0.2,
   touchSensitivity = 0.2,
   showGrid,
+  profile,
   scene,
   showBackground,
   winterMode,
@@ -32,33 +73,83 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
   interactive = true,
   frameQuality,
   zoom = 1,
+  showInteractiveConfigButton = false,
+  interactiveConfig,
+  defaultInteractiveConfig,
+  onInteractiveConfigChange,
+  interactiveConfigDisabled = false,
+  interactiveConfigButtonLabel,
+  interactiveConfigPanelTitle,
+  interactiveConfigTheme,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bouncingAllowed, setBouncingAllowed] = useState(false);
+  const initialInteractiveConfig = useMemo(
+    () => defaultInteractiveConfig ?? parts?.interactiveConfig ?? {},
+    [defaultInteractiveConfig, parts?.interactiveConfig]
+  );
+  const interactiveConfigSeedKey = useMemo(
+    () =>
+      JSON.stringify({
+        parts: parts?.parts,
+        config: defaultInteractiveConfig ?? parts?.interactiveConfig ?? {},
+      }),
+    [defaultInteractiveConfig, parts?.interactiveConfig, parts?.parts]
+  );
+  const [uncontrolledInteractiveConfig, setUncontrolledInteractiveConfig] =
+    useState<RenderInteractiveConfig>(initialInteractiveConfig);
+  const [uncontrolledSeedKey, setUncontrolledSeedKey] = useState(interactiveConfigSeedKey);
+
+  useEffect(() => {
+    if (interactiveConfig === undefined && uncontrolledSeedKey !== interactiveConfigSeedKey) {
+      setUncontrolledInteractiveConfig(initialInteractiveConfig);
+      setUncontrolledSeedKey(interactiveConfigSeedKey);
+    }
+  }, [initialInteractiveConfig, interactiveConfig, interactiveConfigSeedKey, uncontrolledSeedKey]);
 
   const displayW = width ?? size ?? 300;
   const displayH = height ?? size ?? 300;
+  const activeInteractiveConfig = interactiveConfig ?? uncontrolledInteractiveConfig;
+  const renderParts = useMemo(
+    () => mergeInteractiveConfigIntoParts(parts, activeInteractiveConfig),
+    [parts, activeInteractiveConfig]
+  );
+  const supportsInteractiveConfigUi = useSpriteRenderOptions?.mode !== "experimental";
+  const shouldShowInteractiveConfigButton =
+    showInteractiveConfigButton && supportsInteractiveConfigUi && !!parts && !shareCode;
+
+  const handleInteractiveConfigApply = useCallback(
+    (nextConfig: RenderInteractiveConfig) => {
+      if (interactiveConfig === undefined) {
+        setUncontrolledInteractiveConfig(nextConfig);
+      }
+
+      onInteractiveConfigChange?.(nextConfig);
+    },
+    [interactiveConfig, onInteractiveConfigChange]
+  );
 
   // Build the render input - prefer shareCode if provided (preserves interactive state like case fan slots)
   const renderInput: SpriteRenderInput = useMemo(() => {
-    const resolvedShowGrid = showGrid ?? parts?.showGrid;
-    const resolvedScene = scene ?? parts?.scene;
-    const resolvedShowBackground = showBackground ?? parts?.showBackground;
-    const resolvedWinterMode = winterMode ?? parts?.winterMode;
-    const resolvedSpringMode = springMode ?? parts?.springMode;
-    const resolvedCameraOffsetX = cameraOffsetX ?? parts?.cameraOffsetX;
-    const resolvedCameraZoom = cameraZoom ?? parts?.cameraZoom;
-    const resolvedGridSettings = gridSettings ?? parts?.gridSettings;
-    const resolvedFrameQuality = frameQuality ?? parts?.frameQuality;
+    const resolvedShowGrid = showGrid ?? renderParts?.showGrid;
+    const resolvedProfile = profile ?? renderParts?.profile;
+    const resolvedScene = scene ?? renderParts?.scene;
+    const resolvedShowBackground = showBackground ?? renderParts?.showBackground;
+    const resolvedWinterMode = winterMode ?? renderParts?.winterMode;
+    const resolvedSpringMode = springMode ?? renderParts?.springMode;
+    const resolvedCameraOffsetX = cameraOffsetX ?? renderParts?.cameraOffsetX;
+    const resolvedCameraZoom = cameraZoom ?? renderParts?.cameraZoom;
+    const resolvedGridSettings = gridSettings ?? renderParts?.gridSettings;
+    const resolvedFrameQuality = frameQuality ?? renderParts?.frameQuality;
 
     if (shareCode) {
       return { 
         type: 'shareCode', 
         shareCode, 
-        profile: parts?.profile,
+        profile: resolvedProfile,
         showGrid: resolvedShowGrid,
         scene: resolvedScene,
         showBackground: resolvedShowBackground,
@@ -72,7 +163,8 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     }
     return { 
       type: 'parts', 
-      parts: parts!,
+      parts: renderParts!,
+      profile: resolvedProfile,
       showGrid: resolvedShowGrid,
       scene: resolvedScene,
       showBackground: resolvedShowBackground,
@@ -83,7 +175,7 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
       gridSettings: resolvedGridSettings,
       frameQuality: resolvedFrameQuality,
     };
-  }, [shareCode, parts, showGrid, scene, showBackground, winterMode, springMode, cameraOffsetX, cameraZoom, gridSettings, frameQuality]);
+  }, [shareCode, renderParts, showGrid, profile, scene, showBackground, winterMode, springMode, cameraOffsetX, cameraZoom, gridSettings, frameQuality]);
 
   // Use custom hook for sprite rendering
   const { spriteSrc, isRenderingSprite, renderError, spriteMetadata } =
@@ -282,6 +374,10 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
     if (!container || !interactive) return;
 
     const handleNativeWheel = (event: WheelEvent) => {
+      if (event.target instanceof HTMLElement && event.target.closest("[data-buildcores-config-panel]")) {
+        return;
+      }
+
       event.preventDefault();
       event.stopPropagation();
       
@@ -396,6 +492,19 @@ export const BuildRender: React.FC<BuildRenderProps> = ({
         }
         progressValue={progressValue}
       />
+
+      {shouldShowInteractiveConfigButton && parts && (
+        <RenderInteractiveConfigOverlay
+          parts={parts.parts}
+          apiConfig={apiConfig}
+          value={activeInteractiveConfig}
+          onApply={handleInteractiveConfigApply}
+          disabled={interactiveConfigDisabled}
+          buttonLabel={interactiveConfigButtonLabel}
+          title={interactiveConfigPanelTitle}
+          theme={interactiveConfigTheme}
+        />
+      )}
     </div>
   );
 };

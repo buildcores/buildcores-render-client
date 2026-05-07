@@ -1,6 +1,26 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { RenderBuildRequest, PartCategory, ApiConfig } from "../types";
 import { renderBuild, renderBuildExperimental } from "../api";
+import { stableStringify } from "../utils/stableStringify";
+
+function getComparableRenderOptions(parts: RenderBuildRequest) {
+  return {
+    format: parts.format,
+    width: parts.width,
+    height: parts.height,
+    profile: parts.profile,
+    showGrid: parts.showGrid,
+    scene: parts.scene,
+    showBackground: parts.showBackground,
+    winterMode: parts.winterMode,
+    springMode: parts.springMode,
+    cameraOffsetX: parts.cameraOffsetX,
+    gridSettings: parts.gridSettings,
+    frameQuality: parts.frameQuality,
+    cameraZoom: parts.cameraZoom,
+    interactiveConfig: parts.interactiveConfig,
+  };
+}
 
 /**
  * Compares two RenderBuildRequest objects for equality by checking if the same IDs
@@ -36,7 +56,7 @@ export const arePartsEqual = (
     }
   }
 
-  return true;
+  return stableStringify(getComparableRenderOptions(parts1)) === stableStringify(getComparableRenderOptions(parts2));
 };
 
 export interface UseBuildRenderReturn {
