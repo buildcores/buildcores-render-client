@@ -118,8 +118,56 @@ function makeOptions() {
   };
 }
 
+function makeDefaultFanOptions() {
+  return {
+    defaultConfig: {
+      showSidePanel: true,
+    },
+    slots: [
+      {
+        slotId: "case:Front",
+        group: "case",
+        side: "Front",
+        label: "Case Front",
+        size: 240,
+        supportedFanSizesMm: [120],
+        radiatorSupportMm: [],
+        maxRadiatorThicknessMm: 60,
+        accepts: [PartCategory.CaseFan],
+        availablePartIds: ["fan-default", "fan-default"],
+        occupiedParts: [],
+      },
+      {
+        slotId: "case:Top",
+        group: "case",
+        side: "Top",
+        label: "Case Top",
+        size: 240,
+        supportedFanSizesMm: [120],
+        radiatorSupportMm: [],
+        maxRadiatorThicknessMm: 60,
+        accepts: [PartCategory.CaseFan],
+        availablePartIds: ["fan-default", "fan-default"],
+        occupiedParts: [],
+      },
+    ],
+    availableFans: [
+      {
+        partId: "fan-default",
+        name: "Default RGB Fan",
+        category: PartCategory.CaseFan,
+        count: 3,
+        image: null,
+      },
+    ],
+    availableCoolers: [],
+    warnings: [],
+  };
+}
+
 let capturedConfig = {};
 let fetchBodies = [];
+let currentOptions = makeOptions;
 const originalFetch = globalThis.fetch;
 
 globalThis.fetch = async (_url, init) => {
@@ -130,16 +178,16 @@ globalThis.fetch = async (_url, init) => {
     ok: true,
     status: 200,
     statusText: "OK",
-    json: async () => makeOptions(),
+    json: async () => currentOptions(),
   };
 };
 
-function ConfigHarness({ theme = "light" }) {
+function ConfigHarness({ theme = "light", requestParts = parts }) {
   const [config, setConfig] = useState({});
   capturedConfig = config;
 
   return React.createElement(RenderInteractiveConfigBuilder, {
-    parts,
+    parts: requestParts,
     apiConfig,
     value: config,
     onChange: (nextConfig) => {
@@ -158,8 +206,12 @@ async function waitForBuilderReady() {
 }
 
 async function placeFanInFront() {
-  await click(screen.getByRole("button", { name: "Place LL120 RGB 120mm Fan" }));
-  await click(screen.getByRole("button", { name: "Place LL120 RGB 120mm Fan in Front" }));
+  await placeInventoryItem("LL120 RGB 120mm Fan", "Front");
+}
+
+async function placeInventoryItem(partName, targetName) {
+  await click(screen.getByRole("button", { name: `Place ${partName}` }));
+  await click(screen.getByRole("button", { name: `Place ${partName} in ${targetName}` }));
 }
 
 async function flushReact() {
@@ -252,6 +304,20 @@ try {
   assert.equal(fetchBodies.length, 1);
   assert.deepEqual(fetchBodies[0], { parts });
   cleanup();
+
+  currentOptions = makeDefaultFanOptions;
+  capturedConfig = {};
+  const defaultFanParts = {
+    [PartCategory.PCCase]: ["case-a"],
+  };
+  render(React.createElement(ConfigHarness, { theme: "dark", requestParts: defaultFanParts }));
+  await waitForBuilderReady();
+  assert.ok(screen.getByText("3 available"));
+  await placeInventoryItem("Default RGB Fan", "Front");
+  await waitForCondition(() => assert.equal(capturedConfig.caseFans?.length, 1));
+  assert.ok(screen.getByText("2 available"));
+  cleanup();
+  currentOptions = makeOptions;
 
   let appliedOverlayConfig = null;
   render(

@@ -63,14 +63,12 @@ export function getRemainingFanOptions(
   return (options?.availableFans ?? []).flatMap((fan) => {
     const selectedQuantity = getPartQuantity(parts, PartCategory.CaseFan, fan.partId);
     const placedQuantity = getPlacedFanQuantity(config, fan.partId);
-    const slotCapacity = getSlotFanCapacity(options?.slots ?? [], fan.partId);
+    const totalCapacity = getSlotFanCapacity(options?.slots ?? [], fan.partId);
     const sourceQuantity = selectedQuantity || (fan.count ?? 1);
-    const remainingQuantity = selectedQuantity
-      ? Math.max(0, selectedQuantity - placedQuantity)
-      : Math.min(sourceQuantity, slotCapacity);
-    const count = slotCapacity ? Math.min(remainingQuantity, slotCapacity) : remainingQuantity;
+    const totalPlaceableQuantity = Math.min(sourceQuantity, totalCapacity);
+    const remainingQuantity = Math.max(0, totalPlaceableQuantity - placedQuantity);
 
-    return count > 0 ? [{ ...fan, count }] : [];
+    return remainingQuantity > 0 ? [{ ...fan, count: remainingQuantity }] : [];
   });
 }
 
@@ -180,5 +178,5 @@ function getPlacedFanQuantity(config: RenderInteractiveConfig, partId: string): 
 }
 
 function getSlotFanCapacity(slots: RenderInteractiveSlotOption[], partId: string): number {
-  return Math.max(0, ...slots.map((slot) => slot.availablePartIds.filter((id) => id === partId).length));
+  return slots.reduce((sum, slot) => sum + slot.availablePartIds.filter((id) => id === partId).length, 0);
 }
