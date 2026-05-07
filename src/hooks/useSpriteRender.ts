@@ -41,6 +41,7 @@ export type SpriteRenderInput =
   | { 
       type: 'parts'; 
       parts: RenderBuildRequest;
+      profile?: RenderBuildRequest["profile"];
       showGrid?: boolean;
       scene?: RenderBuildRequest["scene"];
       showBackground?: boolean;
@@ -89,6 +90,7 @@ export const useSpriteRender = (
       : {
           type: 'parts',
           parts: input,
+          profile: input.profile,
           showGrid: input.showGrid,
           scene: input.scene,
           showBackground: input.showBackground,
@@ -152,6 +154,7 @@ export const useSpriteRender = (
             {
               ...currentParts,
               showGrid: currentInput.showGrid,
+              profile: currentInput.profile,
               scene: currentInput.scene,
               showBackground: currentInput.showBackground,
               winterMode: currentInput.winterMode,
@@ -186,6 +189,7 @@ export const useSpriteRender = (
               ...currentParts, 
               format: "sprite",
               showGrid: currentInput.showGrid,
+              profile: currentInput.profile,
               scene: currentInput.scene,
               showBackground: currentInput.showBackground,
               winterMode: currentInput.winterMode,
@@ -244,6 +248,7 @@ export const useSpriteRender = (
       const gridSettingsEqual = 
         JSON.stringify(a.gridSettings ?? {}) === JSON.stringify(b.gridSettings ?? {});
       return arePartsEqual(a.parts, b.parts) &&
+             a.profile === b.profile &&
              a.showGrid === b.showGrid &&
              a.scene === b.scene &&
              a.showBackground === b.showBackground &&

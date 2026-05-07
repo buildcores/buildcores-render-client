@@ -28,7 +28,7 @@ export default [
         exclude: ['**/*.test.ts', '**/*.test.tsx'],
       }),
     ],
-    external: ['react', 'react-dom', 'framer-motion'],
+    external: ['react', 'react-dom', 'framer-motion', 'lucide-react'],
   },
   {
     input: 'src/index.ts',

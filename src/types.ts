@@ -125,7 +125,18 @@ export interface BuildRenderVideoProps {
    * @default 0.01
    */
   touchSensitivity?: number;
+
+  /** Render quality profile. Overrides parts.profile when provided. */
+  profile?: RenderQualityProfile;
+
+  /** Frame quality for sprite/video capture requests that support frame grids. */
+  frameQuality?: RenderFrameQuality;
+
+  /** Camera zoom level for server-side rendering. */
+  cameraZoom?: number;
 }
+
+export type RenderInteractiveConfigTheme = "light" | "dark" | "system";
 
 export interface BuildRenderProps {
   /**
@@ -233,6 +244,11 @@ export interface BuildRenderProps {
    * @default 0.2
    */
   touchSensitivity?: number;
+
+  /**
+   * Render quality profile. Overrides parts.profile when provided.
+   */
+  profile?: RenderQualityProfile;
 
   /**
    * Show grid in render.
@@ -352,7 +368,7 @@ export interface BuildRenderProps {
    * 
    * @default "standard"
    */
-  frameQuality?: 'standard' | 'high';
+  frameQuality?: RenderFrameQuality;
 
   /**
    * Initial zoom level for the build.
@@ -395,6 +411,61 @@ export interface BuildRenderProps {
    * @default 1
    */
   cameraZoom?: number;
+
+  /**
+   * Show a gear button in the bottom-right corner of the viewer that opens the
+   * built-in fan, radiator, RGB, and side-panel configuration panel.
+   *
+   * The embedded panel is available for parts-based async renders. It is hidden
+   * for share-code renders because those render the saved build state directly.
+   *
+   * @default false
+   */
+  showInteractiveConfigButton?: boolean;
+
+  /**
+   * Controlled interactive configuration for the embedded viewer UI.
+   * Use with `onInteractiveConfigChange` when the host app wants to store or
+   * preview the selected config outside of `BuildRender`.
+   */
+  interactiveConfig?: RenderInteractiveConfig;
+
+  /**
+   * Initial interactive configuration for the embedded viewer UI when using
+   * `BuildRender` in uncontrolled mode.
+   */
+  defaultInteractiveConfig?: RenderInteractiveConfig;
+
+  /**
+   * Called when the customer applies changes in the embedded configuration panel.
+   * In uncontrolled mode, `BuildRender` also stores the config internally and
+   * triggers a new render.
+   */
+  onInteractiveConfigChange?: (config: RenderInteractiveConfig) => void;
+
+  /**
+   * Disable the embedded interactive configuration controls while keeping the
+   * viewer visible.
+   */
+  interactiveConfigDisabled?: boolean;
+
+  /**
+   * Accessible label and tooltip for the embedded configuration gear button.
+   */
+  interactiveConfigButtonLabel?: string;
+
+  /**
+   * Title shown at the top of the embedded configuration panel.
+   */
+  interactiveConfigPanelTitle?: string;
+
+  /**
+   * Theme for the embedded fan/radiator configuration UI.
+   * Use "system" to follow prefers-color-scheme.
+   *
+   * @default "system"
+   */
+  interactiveConfigTheme?: RenderInteractiveConfigTheme;
 }
 
 // API Types
@@ -403,6 +474,14 @@ export interface BuildRenderProps {
  * API configuration for environment and authentication
  */
 export interface ApiConfig {
+  /**
+   * Override the Render API base URL.
+   * Useful for local development against a locally running render_api server.
+   *
+   * @example "http://127.0.0.1:3002"
+   */
+  apiBaseUrl?: string;
+
   /**
    * Environment to use for API requests
    * - 'staging': Development/testing environment
@@ -490,6 +569,76 @@ export enum PartCategory {
   CPUCooler = "CPUCooler",
   /** Case Fans - Additional cooling fans for the case */
   CaseFan = "CaseFan",
+}
+
+export type RenderQualityProfile = 'cinematic' | 'flat' | 'fast';
+export type RenderFrameQuality = 'standard' | 'high';
+
+export interface RenderInteractiveFanPlacement {
+  slotId: string;
+  partId: string;
+  quantity?: number;
+  flip?: boolean;
+}
+
+export interface RenderInteractiveRadiatorConfig {
+  slotId?: string;
+  partId?: string;
+  flip?: boolean;
+  fans?: RenderInteractiveFanPlacement[];
+}
+
+export interface RenderInteractiveRgbConfig {
+  color?: string;
+  rgbPattern?: string;
+  brightness?: number;
+  v2lighting?: {
+    uvScale?: number;
+    script?: {
+      id?: string;
+      params?: Record<string, any>;
+    };
+  };
+}
+
+export interface RenderInteractiveConfig {
+  caseFans?: RenderInteractiveFanPlacement[];
+  radiator?: RenderInteractiveRadiatorConfig;
+  rgb?: RenderInteractiveRgbConfig;
+  showSidePanel?: boolean;
+}
+
+export interface RenderInteractivePartSummary {
+  partId: string;
+  name: string;
+  category: string;
+  image?: string | null;
+  count?: number;
+  isBundled?: boolean;
+  fromRadiatorInventory?: boolean;
+  flip?: boolean;
+}
+
+export interface RenderInteractiveSlotOption {
+  slotId: string;
+  group: 'case' | 'radiator';
+  side: string;
+  label: string;
+  size: number;
+  supportedFanSizesMm: number[];
+  radiatorSupportMm: number[];
+  maxRadiatorThicknessMm: number;
+  accepts: string[];
+  availablePartIds: string[];
+  occupiedParts: RenderInteractivePartSummary[];
+}
+
+export interface RenderInteractiveConfigOptions {
+  defaultConfig: RenderInteractiveConfig;
+  slots: RenderInteractiveSlotOption[];
+  availableFans: RenderInteractivePartSummary[];
+  availableCoolers: RenderInteractivePartSummary[];
+  warnings: string[];
 }
 
 /**
@@ -614,7 +763,7 @@ export interface RenderBuildRequest {
    * };
    * ```
    */
-  profile?: 'cinematic' | 'flat' | 'fast';
+  profile?: RenderQualityProfile;
 
   /**
    * Whether to show the 3D grid in the render.
@@ -664,7 +813,7 @@ export interface RenderBuildRequest {
    * 
    * @default "standard"
    */
-  frameQuality?: 'standard' | 'high';
+  frameQuality?: RenderFrameQuality;
 
   /**
    * Camera zoom level for server-side rendering.
@@ -675,6 +824,12 @@ export interface RenderBuildRequest {
    * @default 1
    */
   cameraZoom?: number;
+
+  /**
+   * Optional one-off interactive layout for case fans, radiator/cooler placement,
+   * RGB lighting, and side-panel visibility.
+   */
+  interactiveConfig?: RenderInteractiveConfig;
 }
 
 /**
@@ -894,7 +1049,7 @@ export interface RenderByShareCodeOptions {
   /** Desired canvas pixel height (256-8192) */
   height?: number;
   /** Render quality profile */
-  profile?: "cinematic" | "flat" | "fast";
+  profile?: RenderQualityProfile;
   /** Environment scene preset */
   scene?: RenderScene;
   /** Whether to show the environment background */
@@ -910,7 +1065,7 @@ export interface RenderByShareCodeOptions {
   /** Grid appearance settings (for thicker/more visible grid in renders) */
   gridSettings?: GridSettings;
   /** Frame quality - 'standard' (72 frames) or 'high' (144 frames for smoother animation) */
-  frameQuality?: 'standard' | 'high';
+  frameQuality?: RenderFrameQuality;
   /** Camera zoom level for rendering. Values > 1 move camera further (build appears smaller). Range: 0.5 to 2.0 */
   cameraZoom?: number;
   /** Polling interval in milliseconds (default: 1500) */
@@ -929,6 +1084,14 @@ export interface RenderByShareCodeJobResponse {
   status: "queued" | "processing" | "completed" | "error";
   /** The share code of the build being rendered */
   share_code: string;
+  /** Final render URL when the create endpoint returns a cached completed job */
+  url?: string | null;
+  /** Final video URL when the create endpoint returns a cached completed job */
+  video_url?: string | null;
+  /** Final sprite URL when the create endpoint returns a cached completed job */
+  sprite_url?: string | null;
+  /** Error text when the create endpoint returns an error status */
+  error?: string | null;
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   RenderByShareCodeOptions,
   RenderByShareCodeJobResponse,
   RenderByShareCodeResponse,
+  RenderInteractiveConfigOptions,
 } from "./types";
 
 // API Configuration
@@ -18,6 +19,7 @@ const API_BASE_URL = "https://www.renderapi.buildcores.com";
 export const API_ENDPOINTS = {
   RENDER_BUILD_EXPERIMENTAL: "/render-build-experimental",
   RENDER_BUILD: "/render-build",
+  INTERACTIVE_OPTIONS: "/interactive-options",
   AVAILABLE_PARTS: "/available-parts",
   BUILD: "/build",
   PARTS: "/parts",
@@ -44,6 +46,11 @@ export interface RenderBuildResponse {
 export interface RenderJobCreateResponse {
   job_id: string;
   status: "queued" | "processing" | "completed" | "error";
+  url?: string | null;
+  video_url?: string | null;
+  sprite_url?: string | null;
+  screenshot_url?: string | null;
+  error?: string | null;
 }
 
 export interface RenderJobStatusResponse {
@@ -106,7 +113,7 @@ export interface RenderAPIService {
 
 // API URL helpers
 export const buildApiUrl = (endpoint: string, config: ApiConfig): string => {
-  const baseUrl = `${API_BASE_URL}${endpoint}`;
+  const baseUrl = `${config.apiBaseUrl ?? API_BASE_URL}${endpoint}`;
   if (config.environment) {
     const separator = endpoint.includes("?") ? "&" : "?";
     return `${baseUrl}${separator}environment=${config.environment}`;
@@ -214,11 +221,24 @@ const fetchWithApiAuth = async (
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function getCompletedRenderUrl(
+  status: Pick<RenderJobStatusResponse, "url" | "video_url" | "sprite_url">,
+  format: "video" | "sprite"
+): string | undefined {
+  return format === "sprite"
+    ? status.sprite_url || status.url || undefined
+    : status.video_url || status.url || undefined;
+}
+
 // API Implementation
 export const renderBuildExperimental = async (
   request: RenderBuildRequest,
   config: ApiConfig
 ): Promise<RenderBuildResponse> => {
+  if (request.interactiveConfig) {
+    throw new Error("interactiveConfig is only supported by async render mode");
+  }
+
   const requestWithFormat = {
     ...request,
     format: request.format || "video", // Default to video format
@@ -286,6 +306,7 @@ export const createRenderBuildJob = async (
     ...(request.frameQuality ? { frameQuality: request.frameQuality } : {}),
     // Include camera zoom for render-time scaling
     ...(request.cameraZoom !== undefined ? { cameraZoom: request.cameraZoom } : {}),
+    ...(request.interactiveConfig ? { interactiveConfig: request.interactiveConfig } : {}),
   };
 
   const response = await fetchWithApiAuth(
@@ -337,18 +358,27 @@ export const renderBuild = async (
   const pollIntervalMs = options?.pollIntervalMs ?? 1500;
   const timeoutMs = options?.timeoutMs ?? 120_000; // 2 minutes default
 
-  const { job_id } = await createRenderBuildJob(request, config);
+  const createResult = await createRenderBuildJob(request, config);
+  const requestedFormat = request.format ?? "video";
+
+  if (createResult.status === "completed") {
+    const finalUrl = getCompletedRenderUrl(createResult, requestedFormat);
+    if (!finalUrl) {
+      throw new Error("Render job completed but no URL returned");
+    }
+    return { videoUrl: finalUrl };
+  }
+
+  if (createResult.status === "error") {
+    throw new Error(createResult.error || "Render job failed");
+  }
 
   const start = Date.now();
   // Poll until completed or error or timeout
   for (;;) {
-    const status = await getRenderBuildStatus(job_id, config);
+    const status = await getRenderBuildStatus(createResult.job_id, config);
     if (status.status === "completed") {
-      const requestedFormat = request.format ?? "video";
-      const finalUrl =
-        (requestedFormat === "sprite"
-          ? status.sprite_url || status.url || undefined
-          : status.video_url || status.url || undefined);
+      const finalUrl = getCompletedRenderUrl(status, requestedFormat);
       if (!finalUrl) {
         throw new Error("Render job completed but no URL returned");
       }
@@ -370,6 +400,10 @@ export const renderSpriteExperimental = async (
   request: RenderBuildRequest,
   config: ApiConfig
 ): Promise<RenderSpriteResponse> => {
+  if (request.interactiveConfig) {
+    throw new Error("interactiveConfig is only supported by async render mode");
+  }
+
   const requestWithFormat = {
     ...request,
     format: "sprite",
@@ -440,6 +474,28 @@ export const getAvailableParts = async (
   }
 
   return (await response.json()) as AvailablePartsResponse;
+};
+
+export const getInteractiveConfigOptions = async (
+  parts: RenderBuildRequest["parts"],
+  config: ApiConfig
+) => {
+  const response = await fetchWithApiAuth(
+    buildApiUrl(API_ENDPOINTS.INTERACTIVE_OPTIONS, config),
+    {
+      method: "POST",
+      body: JSON.stringify({ parts }),
+    },
+    config
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Get interactive config options failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  return (await response.json()) as RenderInteractiveConfigOptions;
 };
 
 // ============================================
@@ -632,19 +688,28 @@ export const renderByShareCode = async (
   const pollIntervalMs = options?.pollIntervalMs ?? 1500;
   const timeoutMs = options?.timeoutMs ?? 120_000; // 2 minutes default
 
-  const { job_id } = await createRenderByShareCodeJob(shareCode, config, options);
+  const createResult = await createRenderByShareCodeJob(shareCode, config, options);
+  const requestedFormat = options?.format ?? "video";
+
+  if (createResult.status === "completed") {
+    const finalUrl = getCompletedRenderUrl(createResult, requestedFormat);
+    if (!finalUrl) {
+      throw new Error("Render job completed but no URL returned");
+    }
+    return { videoUrl: finalUrl };
+  }
+
+  if (createResult.status === "error") {
+    throw new Error(createResult.error || "Render job failed");
+  }
 
   const start = Date.now();
   // Poll until completed or error or timeout
   for (;;) {
-    const status = await getRenderBuildStatus(job_id, config);
+    const status = await getRenderBuildStatus(createResult.job_id, config);
     
     if (status.status === "completed") {
-      const requestedFormat = options?.format ?? "video";
-      const finalUrl =
-        requestedFormat === "sprite"
-          ? status.sprite_url || status.url || undefined
-          : status.video_url || status.url || undefined;
+      const finalUrl = getCompletedRenderUrl(status, requestedFormat);
       
       if (!finalUrl) {
         throw new Error("Render job completed but no URL returned");

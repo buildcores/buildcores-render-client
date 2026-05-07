@@ -3,14 +3,11 @@ import { BuildRender } from '@buildcores/render-client';
 import BuildViewer from './BuildViewer';
 import './App.css';
 
-// ===========================================
-// 🔐 ADD YOUR API CREDENTIALS HERE
-// ===========================================
 const API_CONFIG = {
-  environment: 'prod',
-  authToken: 'test-token'  // Replace with your actual token
+  environment: import.meta.env.VITE_RENDER_API_ENVIRONMENT || 'prod',
+  ...(import.meta.env.VITE_RENDER_API_BASE_URL ? { apiBaseUrl: import.meta.env.VITE_RENDER_API_BASE_URL } : {}),
+  ...(import.meta.env.VITE_RENDER_API_TOKEN ? { authToken: import.meta.env.VITE_RENDER_API_TOKEN } : {})
 };
-// ===========================================
 
 // Build specifications for display
 const buildSpecs = [
@@ -22,6 +19,7 @@ const buildSpecs = [
   { label: 'Storage', value: 'SAMSUNG 990 EVO' },
   { label: 'Case', value: 'MONTECH KING 95 PRO' },
   { label: 'CPU Cooler', value: 'ARCTIC LIQUID FREEZER 360' },
+  { label: 'Case Fan', value: 'Corsair LL120 RGB' },
 ];
 
 // Demo modes
@@ -44,6 +42,22 @@ const SCENE_OPTIONS = [
   'park',
   'lobby'
 ];
+
+function hasMeaningfulInteractiveConfigValue(value) {
+  if (Array.isArray(value)) {
+    return value.some(hasMeaningfulInteractiveConfigValue);
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.values(value).some(hasMeaningfulInteractiveConfigValue);
+  }
+
+  return value !== undefined && value !== null && value !== '';
+}
+
+function hasInteractiveConfigValue(config) {
+  return !!config && hasMeaningfulInteractiveConfigValue(config);
+}
 
 function App() {
   // Demo mode selector
@@ -107,6 +121,13 @@ function App() {
   // Server-side camera zoom (values > 1 = camera further away, build appears smaller in sprite)
   const [cameraZoom, setCameraZoom] = useState(1.0);
   const [appliedCameraZoom, setAppliedCameraZoom] = useState(1.0);
+  const [enableInteractiveConfig, setEnableInteractiveConfig] = useState(false);
+  const [appliedEnableInteractiveConfig, setAppliedEnableInteractiveConfig] = useState(false);
+  const [interactiveConfig, setInteractiveConfig] = useState({});
+  const [appliedInteractiveConfig, setAppliedInteractiveConfig] = useState({});
+  const [interactiveConfigTheme, setInteractiveConfigTheme] = useState('dark');
+  const defaultAutoplaceEnabled = !enableInteractiveConfig;
+  const showInteractiveConfigControls = enableInteractiveConfig || appliedEnableInteractiveConfig;
 
   // Build current grid settings object
   const currentGridSettings = useCustomGridSettings ? {
@@ -128,6 +149,8 @@ function App() {
                      springMode !== appliedSpringMode ||
                      cameraOffsetX !== appliedCameraOffsetX ||
                      cameraZoom !== appliedCameraZoom ||
+                     enableInteractiveConfig !== appliedEnableInteractiveConfig ||
+                     JSON.stringify(interactiveConfig) !== JSON.stringify(appliedInteractiveConfig) ||
                      useCustomGridSettings !== appliedUseCustomGridSettings ||
                      (useCustomGridSettings && JSON.stringify(currentGridSettings) !== JSON.stringify(appliedGridSettings)) ||
                      frameQuality !== appliedFrameQuality;
@@ -145,11 +168,23 @@ function App() {
     setAppliedSpringMode(springMode);
     setAppliedCameraOffsetX(cameraOffsetX);
     setAppliedCameraZoom(cameraZoom);
+    setAppliedEnableInteractiveConfig(enableInteractiveConfig);
+    setAppliedInteractiveConfig(interactiveConfig);
     setAppliedUseCustomGridSettings(useCustomGridSettings);
     setAppliedGridSettings(currentGridSettings);
     setAppliedFrameQuality(frameQuality);
     setRenderKey(prev => prev + 1); // Increment to force re-render
   };
+
+  function handleEmbeddedInteractiveConfigChange(nextConfig) {
+    const hasConfig = hasInteractiveConfigValue(nextConfig);
+
+    setEnableInteractiveConfig(hasConfig);
+    setAppliedEnableInteractiveConfig(hasConfig);
+    setInteractiveConfig(nextConfig);
+    setAppliedInteractiveConfig(nextConfig);
+    setRenderKey(prev => prev + 1);
+  }
 
   // Calculate display dimensions to match aspect ratio
   const calculateDisplaySize = () => {
@@ -205,6 +240,7 @@ function App() {
       Storage: ["0bkvs17po"],          // SAMSUNG 990 EVO
       PCCase: ["qq9jamk7c"],           // MONTECH KING 95 PRO
       CPUCooler: ["62d8zelr5"],        // ARCTIC LIQUID FREEZER 360
+      CaseFan: ["mm5z1tn7f", "mm5z1tn7f"], // Corsair LL120 RGB 120mm x2
     },
     // Use applied resolution settings (not pending ones)
     ...(appliedCustomResolution ? { width: appliedWidth, height: appliedHeight } : {}),
@@ -213,7 +249,8 @@ function App() {
     scene: appliedScene,
     showBackground: appliedShowBackground,
     winterMode: appliedWinterMode,
-    springMode: appliedSpringMode
+    springMode: appliedSpringMode,
+    ...(appliedEnableInteractiveConfig ? { interactiveConfig: appliedInteractiveConfig } : {})
   };
 
   // Build grid settings for composition
@@ -519,6 +556,48 @@ function App() {
           </div>
         </div>
 
+        <div className="resolution-controls">
+          <div className="control-header">
+            <h3>Interactive Layout</h3>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={defaultAutoplaceEnabled}
+                onChange={(e) => setEnableInteractiveConfig(!e.target.checked)}
+              />
+              <span className="toggle-slider"></span>
+              <span className="toggle-label">Default autoplace</span>
+            </label>
+          </div>
+
+          {showInteractiveConfigControls && (
+            <div className="quality-select-container" style={{ marginTop: '12px', marginBottom: '12px' }}>
+              <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Config UI Theme</label>
+              <select
+                value={interactiveConfigTheme}
+                onChange={(e) => setInteractiveConfigTheme(e.target.value)}
+                className="quality-select"
+              >
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+          )}
+
+          <div className="code-example" style={{ marginTop: 16 }}>
+            <h4>Request Preview</h4>
+            <pre>{JSON.stringify({
+              renderQuality: {
+                profile,
+                frameQuality,
+                cameraZoom
+              },
+              interactiveConfig: enableInteractiveConfig ? interactiveConfig : undefined
+            }, null, 2)}</pre>
+          </div>
+        </div>
+
         {/* Composition Settings */}
         <div className="resolution-controls">
           <div className="control-header">
@@ -780,6 +859,7 @@ function App() {
               mouseSensitivity={0.2}
               touchSensitivity={0.2}
               apiConfig={API_CONFIG}
+              profile={appliedProfile}
               showGrid={appliedShowGrid}
               scene={appliedScene}
               showBackground={appliedShowBackground}
@@ -789,6 +869,10 @@ function App() {
               cameraZoom={appliedCameraZoom}
               gridSettings={appliedGridSettingsObj}
               frameQuality={appliedFrameQuality}
+              showInteractiveConfigButton={appliedEnableInteractiveConfig}
+              interactiveConfig={appliedEnableInteractiveConfig ? appliedInteractiveConfig : undefined}
+              onInteractiveConfigChange={handleEmbeddedInteractiveConfigChange}
+              interactiveConfigTheme={interactiveConfigTheme}
             />
           </div>
 

@@ -1,9 +1,21 @@
 export { BuildRender } from "./BuildRender";
 export { BuildRenderVideo } from "./BuildRenderVideo";
+export { RenderInteractiveConfigBuilder } from "./components/RenderInteractiveConfigBuilder";
+export { RenderInteractiveConfigOverlay } from "./components/RenderInteractiveConfigOverlay";
 export type {
   BuildRenderProps,
   BuildRenderVideoProps,
   RenderBuildRequest,
+  RenderFrameQuality,
+  RenderInteractiveConfig,
+  RenderInteractiveConfigOptions,
+  RenderInteractiveFanPlacement,
+  RenderInteractivePartSummary,
+  RenderInteractiveRadiatorConfig,
+  RenderInteractiveRgbConfig,
+  RenderInteractiveSlotOption,
+  RenderInteractiveConfigTheme,
+  RenderQualityProfile,
   AvailablePartsResponse,
   PartDetails,
   ApiConfig,
@@ -31,8 +43,12 @@ export { useBouncePatternProgress } from "./hooks/useProgressOneSecond";
 export { useContinuousSpin } from "./hooks/useContinuousSpin";
 export { useBuildRender, arePartsEqual } from "./hooks/useBuildRender";
 export { useSpriteRender } from "./hooks/useSpriteRender";
+export { useInteractiveConfigOptions } from "./hooks/useInteractiveConfigOptions";
 export type { UseBuildRenderReturn, UseBuildRenderOptions } from "./hooks/useBuildRender";
 export type { UseSpriteRenderReturn, UseSpriteRenderOptions, SpriteRenderInput } from "./hooks/useSpriteRender";
+export type { UseInteractiveConfigOptionsReturn } from "./hooks/useInteractiveConfigOptions";
+export type { RenderInteractiveConfigBuilderProps } from "./components/RenderInteractiveConfigBuilder";
+export type { RenderInteractiveConfigOverlayProps } from "./components/RenderInteractiveConfigOverlay";
 export { DragIcon } from "./components/DragIcon";
 export { LoadingErrorOverlay } from "./components/LoadingErrorOverlay";
 export { InstructionTooltip } from "./components/InstructionTooltip";
@@ -43,7 +59,11 @@ export {
   buildHeaders,
   renderBuildExperimental,
   renderSpriteExperimental,
+  createRenderBuildJob,
+  getRenderBuildStatus,
+  renderBuild,
   getAvailableParts,
+  getInteractiveConfigOptions,
   // New API functions for build and parts
   getBuildByShareCode,
   getPartsByIds,
