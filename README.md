@@ -88,6 +88,10 @@ The main React component for rendering interactive 3D PC builds.
 | `size`             | `number`             | ✅       | -       | Video size in pixels (square dimensions) |
 | `mouseSensitivity` | `number`             | ❌       | `0.2`   | Mouse drag sensitivity (0.001-1)         |
 | `touchSensitivity` | `number`             | ❌       | `0.2`   | Touch drag sensitivity (0.001-1)         |
+| `modelQuality` | `"low" \| "medium" \| "high"` | ❌ | API default | 3D model asset quality for server renders |
+| `showInteractiveConfigButton` | `boolean` | ❌ | `false` | Show the embedded fan/radiator configuration menu for parts-based async renders |
+| `interactiveConfigPanelPosition` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | ❌ | `"top-left"` | Corner where the embedded configuration menu opens |
+| `interactiveConfigPanelHeight` | `"compact" \| "max" \| number \| string` | ❌ | `"max"` | Height for the embedded configuration menu |
 
 #### Parts Configuration
 

@@ -21,6 +21,7 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
   profile,
   frameQuality,
   cameraZoom,
+  modelQuality,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +34,7 @@ export const BuildRenderVideo: React.FC<BuildRenderVideoProps> = ({
     ...(profile ? { profile } : {}),
     ...(frameQuality ? { frameQuality } : {}),
     ...(cameraZoom !== undefined ? { cameraZoom } : {}),
+    ...(modelQuality ? { modelQuality } : {}),
   };
 
   // Use custom hook for build rendering

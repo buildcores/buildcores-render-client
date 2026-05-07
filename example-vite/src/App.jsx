@@ -70,6 +70,7 @@ function App() {
   
   // Quality profile control
   const [profile, setProfile] = useState('cinematic');
+  const [modelQuality, setModelQuality] = useState('low');
   
   // Composition controls
   const [showGrid, setShowGrid] = useState(true);
@@ -92,6 +93,7 @@ function App() {
   const [appliedHeight, setAppliedHeight] = useState(1080);
   const [appliedCustomResolution, setAppliedCustomResolution] = useState(true);
   const [appliedProfile, setAppliedProfile] = useState('cinematic');
+  const [appliedModelQuality, setAppliedModelQuality] = useState('low');
   const [appliedShowGrid, setAppliedShowGrid] = useState(true);
   const [appliedScene, setAppliedScene] = useState('studio_v2');
   const [appliedShowBackground, setAppliedShowBackground] = useState(false);
@@ -126,6 +128,8 @@ function App() {
   const [interactiveConfig, setInteractiveConfig] = useState({});
   const [appliedInteractiveConfig, setAppliedInteractiveConfig] = useState({});
   const [interactiveConfigTheme, setInteractiveConfigTheme] = useState('dark');
+  const [interactiveConfigPanelPosition, setInteractiveConfigPanelPosition] = useState('top-left');
+  const [interactiveConfigPanelHeight, setInteractiveConfigPanelHeight] = useState('max');
   const defaultAutoplaceEnabled = !enableInteractiveConfig;
   const showInteractiveConfigControls = enableInteractiveConfig || appliedEnableInteractiveConfig;
 
@@ -140,9 +144,10 @@ function App() {
 
   // Check if settings have changed
   const hasChanges = useCustomResolution !== appliedCustomResolution || 
-                     (useCustomResolution && (width !== appliedWidth || height !== appliedHeight)) ||
-                     profile !== appliedProfile ||
-                     showGrid !== appliedShowGrid ||
+	                     (useCustomResolution && (width !== appliedWidth || height !== appliedHeight)) ||
+	                     profile !== appliedProfile ||
+	                     modelQuality !== appliedModelQuality ||
+	                     showGrid !== appliedShowGrid ||
                      scene !== appliedScene ||
                      showBackground !== appliedShowBackground ||
                      winterMode !== appliedWinterMode ||
@@ -161,6 +166,7 @@ function App() {
     setAppliedHeight(height);
     setAppliedCustomResolution(useCustomResolution);
     setAppliedProfile(profile);
+    setAppliedModelQuality(modelQuality);
     setAppliedShowGrid(showGrid);
     setAppliedScene(scene);
     setAppliedShowBackground(showBackground);
@@ -246,6 +252,7 @@ function App() {
     ...(appliedCustomResolution ? { width: appliedWidth, height: appliedHeight } : {}),
     // Include quality profile
     profile: appliedProfile,
+    modelQuality: appliedModelQuality,
     scene: appliedScene,
     showBackground: appliedShowBackground,
     winterMode: appliedWinterMode,
@@ -544,6 +551,19 @@ function App() {
           </div>
 
           <div className="quality-select-container" style={{ marginTop: '12px' }}>
+            <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Model Quality</label>
+            <select
+              value={modelQuality}
+              onChange={(e) => setModelQuality(e.target.value)}
+              className="quality-select"
+            >
+              <option value="low">Low - fastest model loading</option>
+              <option value="medium">Medium - balanced model detail</option>
+              <option value="high">High - highest-detail model assets</option>
+            </select>
+          </div>
+
+          <div className="quality-select-container" style={{ marginTop: '12px' }}>
             <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Frame Quality</label>
             <select 
               value={frameQuality} 
@@ -571,27 +591,56 @@ function App() {
           </div>
 
           {showInteractiveConfigControls && (
-            <div className="quality-select-container" style={{ marginTop: '12px', marginBottom: '12px' }}>
-              <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Config UI Theme</label>
-              <select
-                value={interactiveConfigTheme}
-                onChange={(e) => setInteractiveConfigTheme(e.target.value)}
-                className="quality-select"
-              >
-                <option value="system">System</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </div>
+            <>
+              <div className="quality-select-container" style={{ marginTop: '12px', marginBottom: '12px' }}>
+                <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Config UI Theme</label>
+                <select
+                  value={interactiveConfigTheme}
+                  onChange={(e) => setInteractiveConfigTheme(e.target.value)}
+                  className="quality-select"
+                >
+                  <option value="system">System</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+
+              <div className="quality-select-container" style={{ marginTop: '12px', marginBottom: '12px' }}>
+                <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Config UI Position</label>
+                <select
+                  value={interactiveConfigPanelPosition}
+                  onChange={(e) => setInteractiveConfigPanelPosition(e.target.value)}
+                  className="quality-select"
+                >
+                  <option value="top-left">Top left</option>
+                  <option value="top-right">Top right</option>
+                  <option value="bottom-left">Bottom left</option>
+                  <option value="bottom-right">Bottom right</option>
+                </select>
+              </div>
+
+              <div className="quality-select-container" style={{ marginTop: '12px', marginBottom: '12px' }}>
+                <label style={{ fontSize: '14px', marginBottom: '6px', display: 'block' }}>Config UI Height</label>
+                <select
+                  value={interactiveConfigPanelHeight}
+                  onChange={(e) => setInteractiveConfigPanelHeight(e.target.value)}
+                  className="quality-select"
+                >
+                  <option value="compact">Compact</option>
+                  <option value="max">Max</option>
+                </select>
+              </div>
+            </>
           )}
 
           <div className="code-example" style={{ marginTop: 16 }}>
             <h4>Request Preview</h4>
             <pre>{JSON.stringify({
-              renderQuality: {
-                profile,
-                frameQuality,
-                cameraZoom
+	              renderQuality: {
+	                profile,
+	                modelQuality,
+	                frameQuality,
+	                cameraZoom
               },
               interactiveConfig: enableInteractiveConfig ? interactiveConfig : undefined
             }, null, 2)}</pre>
@@ -867,12 +916,15 @@ function App() {
               springMode={appliedSpringMode}
               cameraOffsetX={appliedCameraOffsetX}
               cameraZoom={appliedCameraZoom}
+              modelQuality={appliedModelQuality}
               gridSettings={appliedGridSettingsObj}
               frameQuality={appliedFrameQuality}
               showInteractiveConfigButton={appliedEnableInteractiveConfig}
               interactiveConfig={appliedEnableInteractiveConfig ? appliedInteractiveConfig : undefined}
               onInteractiveConfigChange={handleEmbeddedInteractiveConfigChange}
               interactiveConfigTheme={interactiveConfigTheme}
+              interactiveConfigPanelPosition={interactiveConfigPanelPosition}
+              interactiveConfigPanelHeight={interactiveConfigPanelHeight}
             />
           </div>
 

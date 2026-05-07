@@ -36,6 +36,7 @@ try {
       {
         ...baseRequest,
         profile: "cinematic",
+        modelQuality: "high",
       }
     ),
     false,
@@ -74,6 +75,7 @@ try {
       profile: "fast",
       frameQuality: "high",
       cameraZoom: 1.3,
+      modelQuality: "medium",
       interactiveConfig: {
         caseFans: [
           {
@@ -99,6 +101,7 @@ try {
   assert.equal(capturedRenderBody.profile, "fast");
   assert.equal(capturedRenderBody.frameQuality, "high");
   assert.equal(capturedRenderBody.cameraZoom, 1.3);
+  assert.equal(capturedRenderBody.modelQuality, "medium");
   assert.deepEqual(capturedRenderBody.interactiveConfig.caseFans[0], {
     slotId: "case:front",
     partId: "fan-a",

@@ -245,6 +245,23 @@ async function click(element) {
 
 try {
   setPrefersDark(true);
+
+  let resolveLoadingOptions;
+  currentOptions = () => new Promise((resolve) => {
+    resolveLoadingOptions = () => resolve(makeOptions());
+  });
+  render(React.createElement(ConfigHarness, { theme: "dark" }));
+  await waitForCondition(() => {
+    assert.ok(screen.queryByText("Loading case slots..."));
+    assert.equal(typeof resolveLoadingOptions, "function");
+  });
+  assert.equal(screen.queryByText("No unplaced items"), null);
+  assert.equal(screen.queryByText("No configurable slots."), null);
+  resolveLoadingOptions();
+  await waitForBuilderReady();
+  cleanup();
+  currentOptions = makeOptions;
+
   render(React.createElement(ConfigHarness, { theme: "system" }));
   await waitForBuilderReady();
 
@@ -331,6 +348,8 @@ try {
         appliedOverlayConfig = nextConfig;
       },
       theme: "dark",
+      panelPosition: "top-right",
+      panelHeight: "compact",
     })
   );
 
@@ -338,7 +357,13 @@ try {
   await waitForCondition(() => assert.ok(screen.queryByTestId("render-config-panel")));
   const panel = screen.getByTestId("render-config-panel");
   assert.equal(panel.getAttribute("data-buildcores-config-theme"), "dark");
+  assert.equal(panel.getAttribute("data-buildcores-config-position"), "top-right");
+  assert.equal(panel.getAttribute("data-buildcores-config-height"), "compact");
   assert.equal(panel.style.getPropertyValue("--bcrc-surface"), "#0d0e10");
+  assert.equal(panel.style.top, "12px");
+  assert.equal(panel.style.right, "12px");
+  assert.equal(panel.style.left, "");
+  assert.equal(panel.style.height, "560px");
   assert.equal(screen.getByTestId("render-config-builder").getAttribute("data-buildcores-config-theme"), "dark");
   await click(screen.getByRole("button", { name: "Apply" }));
   await waitForCondition(() => assert.equal(appliedOverlayConfig?.showSidePanel, true));
