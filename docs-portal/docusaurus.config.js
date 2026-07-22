@@ -2,6 +2,8 @@
 
 const lightCodeTheme = require("prism-react-renderer").themes.github;
 const darkCodeTheme = require("prism-react-renderer").themes.dracula;
+const interestFormUrl =
+  "https://docs.google.com/forms/d/e/1FAIpQLSdkPPvBD9CqDb5k-UOOJXRdNXTQ59r6coclQDn6dUMh7RW09A/viewform?usp=header";
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
@@ -65,6 +67,13 @@ const config = {
   themeConfig:
     /** @type {import("@docusaurus/preset-classic").ThemeConfig} */
     ({
+      announcementBar: {
+        id: "september-production-api-release",
+        content: `The production release of the BuildCores API is coming later in September. Stay tuned and <a href="${interestFormUrl}" target="_blank" rel="noopener noreferrer">sign up for updates</a>.`,
+        backgroundColor: "#fce8f5",
+        textColor: "#17181d",
+        isCloseable: false
+      },
       navbar: {
         title: "BuildCores API Docs",
         logo: {
@@ -89,9 +98,10 @@ const config = {
             position: "left"
           },
           {
-            href: "mailto:harsh@buildcores.com",
+            href: interestFormUrl,
             label: "Pricing",
-            position: "right"
+            position: "right",
+            target: "_blank"
           },
           {
             type: "search",
@@ -133,7 +143,7 @@ const config = {
               },
               {
                 label: "Pricing",
-                href: "mailto:harsh@buildcores.com"
+                href: interestFormUrl
               }
             ]
           }
