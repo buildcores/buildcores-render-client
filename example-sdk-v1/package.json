@@ -1,7 +1,7 @@
 {
   "name": "buildcores-sdk-v1-example",
   "private": true,
-  "description": "Plain JavaScript storefront and Node backend for BuildCores SDK v1.0",
+  "description": "Minimal 3D PC Builder Sample for BuildCores SDK v1.0",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",

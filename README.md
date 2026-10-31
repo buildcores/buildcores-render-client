@@ -8,7 +8,7 @@ above. The existing package API and examples below remain the cloud reference.
 
 ## SDK v1.0 sample
 
-[Run the NOVA PC sample](./example-sdk-v1/README.md): a plain JavaScript storefront
+[3D PC Builder Sample](./example-sdk-v1/README.md): a plain JavaScript storefront
 and Node backend with guest sessions, token renewal, and custom 3D controls.
 The default configuration uses stateless PC mode; saved PC and Setup modes are
 also included. No React or frontend package installation is required.

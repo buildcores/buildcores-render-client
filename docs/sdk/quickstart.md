@@ -12,7 +12,7 @@ browser until you save a snapshot in your own application.
 The built-in controls are visible by default. If your shop already has a parts
 selector, see [Use your existing configurator](#use-your-existing-configurator).
 
-For a complete browser and backend example, run the [Sample storefront](./sample.md).
+For a complete browser and backend example, run the [3D PC Builder Sample](./sample.md).
 
 Complete [Get started](./get-started.md) and implement these
 [backend endpoints](./authentication.md):

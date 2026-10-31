@@ -36,7 +36,7 @@ and connect it to your backend endpoints. No frontend package installation is
 required.
 
 Use the [Browser quickstart](./quickstart.md), or run the complete
-[Sample storefront](./sample.md).
+[3D PC Builder Sample](./sample.md).
 
 ## 4. Load your products
 

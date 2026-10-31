@@ -12,7 +12,7 @@ try {
   const address = new URL(config.merchantOrigin);
   const port = Number(address.port || 80);
   server.listen(port, "127.0.0.1", () => {
-    process.stdout.write(`NOVA PC demo ready at ${address.origin}\n`);
+    process.stdout.write(`3D PC Builder Sample ready at ${address.origin}\n`);
   });
 } catch {
   process.stderr.write(

@@ -128,8 +128,8 @@ export function createRetailerServer({ config, embed, apiKey, keyId, sessionSecr
       if (request.method === "GET" && path === "/api/config") {
         json(response, 200, {
           viewerOrigin,
-          brand: "NOVA PC",
-          title: config.title ?? "Your next great build.",
+          brand: "BuildCores",
+          title: config.title ?? "3D PC Builder Sample",
           catalogQueries: config.catalogQueries ?? {},
           preset: config.preset
         });

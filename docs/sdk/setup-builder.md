@@ -77,7 +77,7 @@ Setup mode requires a saved workspace. The `pc.load`, `pc.export`, and
 
 ## Try the sample
 
-In the [Sample storefront](./sample.md), start from
+In the [3D PC Builder Sample](./sample.md), start from
 `config.saved.example.json`. Set `source.kind` to `"setup"` and
 `source.shareCode` to your authorized Setup's share code. Omit `preset`.
 Include a PC in the Setup to try the sample's guided demo.

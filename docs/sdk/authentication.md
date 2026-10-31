@@ -9,7 +9,7 @@ Your backend keeps the API key private and issues short-lived access tokens,
 called **grants**, for each viewer. Use
 **https://www.renderapi.buildcores.com** as the API base URL.
 
-The [Sample storefront](./sample.md) includes a complete Node backend for this flow.
+The [3D PC Builder Sample](./sample.md) includes a complete Node backend for this flow.
 
 ## 1. Register an embed
 

@@ -36,7 +36,7 @@ installation is required.
 
 - [Browser quickstart](./quickstart.md): add a viewer to your page.
 - [Setup Builder (Beta)](./setup-builder.md): add PCs and desk products to a saved workspace.
-- [Sample storefront](./sample.md): run a complete browser and backend example.
+- [3D PC Builder Sample](./sample.md): run a complete browser and backend example.
 - [Backend authentication](./authentication.md): register an embed and issue access tokens.
 - [SDK reference](./client-reference.md): edit configurations and save changes.
 - [Catalog mapping](./catalog.md): connect your products to BuildCores IDs.

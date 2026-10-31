@@ -1,7 +1,7 @@
-# SDK v1.0 sample — NOVA PC
+# 3D PC Builder Sample
 
-A plain JavaScript storefront with a Node backend and the hosted BuildCores 3D
-viewer. No React, package installation, or build step is required.
+A minimal, light-mode PC builder with plain JavaScript, a Node backend, and the
+hosted BuildCores 3D viewer. No React, package installation, or build step is required.
 
 The storefront supplies its own controls for parts, fans, RGB, rendering, and
 Setup products. The iframe keeps camera interaction, BuildCores branding,
@@ -45,12 +45,11 @@ Edits stay in the browser; refreshing restores the preset. Your application can
 save the unchanged JSON from `editor.pc.export()` and restore it with
 `editor.pc.restore(snapshot)`.
 
-Use **Components** to search, add, replace, and remove parts. **Cooling** manages
-fan inventory and authored slots. **Lighting** and **Scene** control RGB and
-render preferences. **Explore configuration SDK** discovers model-specific
-controls.
+Open **Parts**, **RGB lighting**, **Case fans**, or **Scene** to try each feature.
+**Model options** discovers model-specific controls. Only one section opens at a
+time; **SDK activity** shows the commands sent to the viewer.
 
-**Run demo** changes the GPU, places and flips a fan, adjusts RGB and the scene,
+**Run feature demo** changes the GPU, places and flips a fan, adjusts RGB and the scene,
 and resets the camera. It needs a case with authored fan slots, an available
 replacement GPU, and a compatible fan. Optional `catalogQueries` can set search
 defaults, such as `{ "GPU": "GeForce", "CaseFan": "120" }`.
@@ -101,5 +100,6 @@ valid product IDs.
 
 Adapted from [BuildCoresBase PR #1961](https://github.com/buildcores/BuildCoresBase/pull/1961),
 `examples/render-embed-retailer` at `c4b29467cf28c4ec1472484c2a2e52459018a588`.
-The server, storefront JavaScript, HTML, and CSS are copied unchanged. The default
-config selects stateless PC mode; the original saved config is included separately.
+The SDK controls and session flow come from that sample; the interface is simplified
+and uses light mode. The default config selects stateless PC mode, with a separate
+saved-PC/Setup example.

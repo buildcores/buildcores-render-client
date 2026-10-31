@@ -2,8 +2,8 @@
   "renderApiOrigin": "https://www.renderapi.buildcores.com",
   "merchantOrigin": "http://localhost:3090",
   "environment": "staging",
-  "label": "NOVA PC SDK demo",
-  "title": "Your next great build.",
+  "label": "3D PC Builder Sample",
+  "title": "3D PC Builder Sample",
   "source": {
     "kind": "build",
     "shareCode": "REPLACE_WITH_YOUR_CUSTOMER_OWNED_BUILD_SHARE_CODE"

@@ -1,12 +1,15 @@
 ---
-title: Sample storefront
-description: Run a complete SDK v1.0 storefront with a Node backend and plain JavaScript controls.
+title: 3D PC Builder Sample
+description: Try SDK v1.0 features in a minimal, light-mode PC builder.
 ---
 
-# Sample storefront
+# 3D PC Builder Sample
 
-The `example-sdk-v1` folder contains **NOVA PC**, a complete browser and backend
-sample. It uses plain JavaScript and Node 22+, with no React or package installation.
+A minimal, light-mode demo of parts, RGB lighting, case fans, and scene settings.
+Setup Builder (Beta) adds desk products and positioning.
+
+The `example-sdk-v1` folder includes the viewer controls and Node backend.
+It uses plain JavaScript and Node 22+, with no React or package installation.
 
 ## Run it
 
@@ -34,7 +37,7 @@ See the sample's `README.md` for configuration.
 - A 3D iframe with storefront controls for parts, fans, RGB, and scene settings.
 - A Node backend that registers the viewer, signs tokens, and handles guest sessions.
 - Working `/api/editor/open` and `/api/editor/renew` endpoints.
-- A guided demo and SDK activity log.
+- A **Run feature demo** button and collapsible SDK activity log.
 
 The sample uses shorter endpoint paths than the [Browser quickstart](./quickstart.md);
 the request and response contracts are the same. Replace the in-memory guest
