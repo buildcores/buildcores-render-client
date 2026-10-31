@@ -1,25 +1,23 @@
 ---
 title: SDK v1.0
-description: Add an interactive 3D PC or Setup configurator to your website.
+description: Accurate 3D PC models, maintained hardware specs, and fast browser rendering for your website.
 slug: /sdk/
+hide_table_of_contents: true
 ---
 
-import sdkPreview from "@site/static/assets/images/local-configurator.png";
+import Link from "@docusaurus/Link";
+import SdkBenefits from "@site/src/components/SdkBenefits";
 
 # BuildCores SDK v1.0
 
-Add an interactive 3D PC configurator to your website, or a full workspace with
-[Setup Builder (Beta)](./setup-builder.md). The SDK runs in the browser and lets
-shoppers change parts, lighting, cooling, and supported model settings.
+Bring real PC hardware to your website. Add an interactive 3D configurator with
+your own controls or the built-in editor.
 
-Use the built-in controls or connect your own interface. Your backend handles
-access; BuildCores handles the viewer and 3D models.
+<Link className="button button--primary" to="/sdk/get-started/">Get started</Link>
 
-<figure className="doc-figure">
-  <img src={sdkPreview} alt="BuildCores interactive 3D PC configurator" />
-</figure>
+<SdkBenefits />
 
-**[Get started](./get-started.md)** to set up access and add your first viewer.
+Your backend handles access; BuildCores handles the viewer and 3D models.
 
 ## Hosted SDK
 
