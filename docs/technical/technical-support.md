@@ -6,6 +6,11 @@ sidebar_position: 7
 
 # 8. Technical Support
 
+:::note Cloud SDK Beta
+This is the existing cloud-rendered API and `@buildcores/render-client` reference.
+For the browser iframe editor, use [SDK v1.0](../sdk/overview.md).
+:::
+
 - API documentation: `https://www.renderapi.buildcores.com/api-docs`
 - Health check: `GET /health`, no auth required, returns `{ "status": "ok" }`
 - Package: `@buildcores/render-client`

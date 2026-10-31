@@ -6,6 +6,11 @@ sidebar_position: 1
 
 # 2. Authentication
 
+:::note Cloud SDK Beta
+This is the existing cloud-rendered API and `@buildcores/render-client` reference.
+For the browser iframe editor, use [SDK v1.0](../sdk/overview.md).
+:::
+
 All protected API requests require a Bearer token in the `Authorization` header.
 Browser-facing clients should use delegated render session tokens. Your
 long-lived API key stays on your server and should not be exposed to the
@@ -47,19 +52,19 @@ Response:
 
 Parameters:
 
-| Parameter | Type | Required | Description |
-| --- | --- | --- | --- |
-| `ttl_seconds` | integer | No | Token lifetime in seconds. Min `30`, max `300`, default `120`. `ttlSeconds` is also accepted. |
-| `scopes` | string[] | No | Permissions granted to the token. Default is `["render:submit", "render:status"]`. Request `data:read` when the browser needs parts or build data. |
-| `origin` | string | No | Optional HTTP(S) origin binding. If present, browser requests using the token must send a matching `Origin` header. |
+| Parameter     | Type     | Required | Description                                                                                                                                        |
+| ------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ttl_seconds` | integer  | No       | Token lifetime in seconds. Min `30`, max `300`, default `120`. `ttlSeconds` is also accepted.                                                      |
+| `scopes`      | string[] | No       | Permissions granted to the token. Default is `["render:submit", "render:status"]`. Request `data:read` when the browser needs parts or build data. |
+| `origin`      | string   | No       | Optional HTTP(S) origin binding. If present, browser requests using the token must send a matching `Origin` header.                                |
 
 Available scopes:
 
-| Scope | Grants Access To |
-| --- | --- |
+| Scope           | Grants Access To                                                                                               |
+| --------------- | -------------------------------------------------------------------------------------------------------------- |
 | `render:submit` | `POST /render-build`, `POST /render-by-share-code`, `POST /internal-render`, `POST /render-build-experimental` |
-| `render:status` | `GET /render-build/:jobId` |
-| `data:read` | `GET /available-parts`, `GET /build/:shareCode`, `POST /parts` |
+| `render:status` | `GET /render-build/:jobId`                                                                                     |
+| `data:read`     | `GET /available-parts`, `GET /build/:shareCode`, `POST /parts`                                                 |
 
 ### Step 2: Use the session token in the browser
 

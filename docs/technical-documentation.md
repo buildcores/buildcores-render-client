@@ -1,14 +1,20 @@
 ---
-title: 3D Configurator API 2.0
-description: Current technical documentation for the BuildCores Render API and @buildcores/render-client.
+title: Cloud SDK Beta
+description: Cloud SDK Beta reference for the Render API and the @buildcores/render-client React package.
 sidebar_position: 3
 ---
 
 import renderApiFlow from "@site/static/assets/images/render-api-flow.png";
 
-# BuildCores 3D Configurator API: Technical Documentation
+# Cloud SDK Beta
 
-Version 2.0.
+The existing cloud-rendered integration uses `@buildcores/render-client` and the
+Render API to display generated video or sprite assets. Its technical reference
+was previously labeled **3D Configurator API 2.0**. The API contracts and examples
+below are retained for existing integrations.
+
+For the browser iframe editor, start with [SDK v1.0 Get started](./sdk/get-started.md).
+Its grant flow and browser module are separate from the cloud client.
 
 ## 1. High-Level Overview
 

@@ -6,13 +6,18 @@ sidebar_position: 4
 
 # 5. Render Options Reference
 
+:::note Cloud SDK Beta
+This is the existing cloud-rendered API and `@buildcores/render-client` reference.
+For the browser iframe editor, use [SDK v1.0](../sdk/overview.md).
+:::
+
 ## 5.1. Render Profiles
 
-| Profile | Description |
-| --- | --- |
+| Profile     | Description                                                                                    |
+| ----------- | ---------------------------------------------------------------------------------------------- |
 | `cinematic` | Full effects such as shadows, ambient occlusion, and bloom. Highest quality. Grid defaults on. |
-| `flat` | Clean, neutral product shots without the cinematic effect stack. |
-| `fast` | Minimal rendering for fastest processing speed. |
+| `flat`      | Clean, neutral product shots without the cinematic effect stack.                               |
+| `fast`      | Minimal rendering for fastest processing speed.                                                |
 
 ## 5.2. Scene Presets
 
@@ -41,10 +46,10 @@ Seasonal fallback behavior:
 
 When `showGrid` is true, `gridSettings` can customize the grid:
 
-| Property | Type | Default | Description |
-| --- | --- | --- | --- |
-| `cellThickness` | number | `0.8` | Grid cell line thickness. |
-| `sectionThickness` | number | `1.4` | Grid section line thickness. |
-| `color` | string | `"#6f6f6f"` | Grid color as a hex string. |
-| `fadeDistance` | number | `20` | Distance at which the grid fades out. |
-| `renderOrder` | integer | `-1` | Depth sort order. Use `-1` to render behind objects. |
+| Property           | Type    | Default     | Description                                          |
+| ------------------ | ------- | ----------- | ---------------------------------------------------- |
+| `cellThickness`    | number  | `0.8`       | Grid cell line thickness.                            |
+| `sectionThickness` | number  | `1.4`       | Grid section line thickness.                         |
+| `color`            | string  | `"#6f6f6f"` | Grid color as a hex string.                          |
+| `fadeDistance`     | number  | `20`        | Distance at which the grid fades out.                |
+| `renderOrder`      | integer | `-1`        | Depth sort order. Use `-1` to render behind objects. |

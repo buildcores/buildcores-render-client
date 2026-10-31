@@ -1,0 +1,23 @@
+{
+  "renderApiOrigin": "https://www.renderapi.buildcores.com",
+  "merchantOrigin": "http://localhost:3090",
+  "environment": "staging",
+  "label": "NOVA PC SDK demo",
+  "title": "Your next great build.",
+  "source": {
+    "kind": "pc"
+  },
+  "preset": {
+    "parts": {
+      "PCCase": ["YOUR_CASE_BUILDCORES_ID"],
+      "GPU": ["YOUR_GPU_BUILDCORES_ID"]
+    },
+    "interactiveConfig": {
+      "showSidePanel": false,
+      "rgb": {
+        "color": "#22aaff",
+        "brightness": 65
+      }
+    }
+  }
+}
