@@ -42,7 +42,27 @@ experiences.
 
 ## Available Services
 
-### Cloud-Rendered 3D Configurator
+### Browser SDK v1.0 — Interactive Browser Configurator
+
+<figure className="doc-figure">
+  <img src={localConfigurator} alt="Locally rendered BuildCores configurator UI" />
+  <figcaption>Example of a locally rendered configurator on BuildCores.com.</figcaption>
+</figure>
+
+- Uses the same browser rendering family that powers interactive 3D on BuildCores.com.
+- Embeds a hosted iframe with built-in controls or a framework-independent browser SDK for your own UI.
+- Supports stateless PC presets and saved PC editors with server autosave.
+- [Setup Builder (Beta)](./sdk/setup-builder.md) adds saved workspaces with PCs and desk products.
+- Exposes supported parts, RGB, cooling, model configuration, Setup products, and render preferences.
+- Uses short-lived grants signed by your backend; no private API key belongs in the browser.
+
+<p className="pricing-note">For pricing information, reach out to harsh@buildcores.com.</p>
+
+Start with [SDK v1.0 Get started](./sdk/get-started.md) for sandbox access and
+integration steps. Other platform capabilities and custom workflows should be
+scoped with BuildCores separately.
+
+### Cloud SDK Beta — Cloud-Rendered 3D Configurator
 
 <figure className="doc-figure">
   <img src={medalConfigurator} alt="Medal.tv configurator powered by BuildCores" />
@@ -55,23 +75,6 @@ experiences.
 - Supports complex RGB effects and case fan configuration when the selected parts and saved interactive state include those placements.
 
 <p className="pricing-note">For pricing information, reach out to harsh@buildcores.com.</p>
-
-### Locally Rendered Components
-
-<figure className="doc-figure">
-  <img src={localConfigurator} alt="Locally rendered BuildCores configurator UI" />
-  <figcaption>Example of a locally rendered configurator on BuildCores.com.</figcaption>
-</figure>
-
-- Uses the same browser rendering family that powers interactive 3D on BuildCores.com.
-- Provides fully interactive 3D scenes and customization for qualified partner integrations.
-- Supports whole PC build, setup, and single product rendering workflows when the integration is scoped for local rendering.
-- Can support RGB effects, case fan configuration, and AR-style workflows where the target platform and partner package support them.
-
-<p className="pricing-note">For pricing information, reach out to harsh@buildcores.com.</p>
-
-Locally rendered integrations are separate from the cloud-rendered
-`@buildcores/render-client` flow documented in the technical guide.
 
 ### Product Database
 

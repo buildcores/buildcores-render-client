@@ -6,6 +6,11 @@ sidebar_position: 3
 
 # 4. Backend API Reference
 
+:::note Cloud SDK Beta
+This is the existing cloud-rendered API and `@buildcores/render-client` reference.
+For the browser iframe editor, use [SDK v1.0](../sdk/overview.md).
+:::
+
 Base URL:
 
 ```text
@@ -34,11 +39,11 @@ Required scope: `data:read`
 
 Query parameters:
 
-| Parameter | Type | Required | Description |
-| --- | --- | --- | --- |
-| `category` | string | Yes | Part category, such as `GPU`, `CPU`, or `PCCase`. |
-| `limit` | integer | No | Results per page. Default `20`, max `100`. |
-| `skip` | integer | No | Number of results to skip. Default `0`. |
+| Parameter  | Type    | Required | Description                                       |
+| ---------- | ------- | -------- | ------------------------------------------------- |
+| `category` | string  | Yes      | Part category, such as `GPU`, `CPU`, or `PCCase`. |
+| `limit`    | integer | No       | Results per page. Default `20`, max `100`.        |
+| `skip`     | integer | No       | Number of results to skip. Default `0`.           |
 
 Example:
 
@@ -78,22 +83,22 @@ The current implementation only accepts `prod` for the async render environment.
 
 Request body:
 
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `parts` | `{ [category]: string[] }` | Yes | Part IDs mapped by category. The object cannot be empty. |
-| `format` | `"video" \| "sprite"` | No | Output format. Default is `"video"`. |
-| `width` | integer | No | Canvas width. Must be provided with `height`. Range `256` to `8192`. |
-| `height` | integer | No | Canvas height. Must be provided with `width`. Range `256` to `8192`. |
-| `profile` | `"cinematic" \| "flat" \| "fast"` | No | Render quality profile. |
-| `scene` | string | No | Environment scene preset. |
-| `showBackground` | boolean | No | Show the environment background. |
-| `showGrid` | boolean | No | Show the 3D ground grid. Defaults to `true` unless profile is `flat` or `fast`. |
-| `winterMode` | boolean | No | Winter visual effects. Mutually exclusive with `springMode`. |
-| `springMode` | boolean | No | Spring visual effects. Mutually exclusive with `winterMode`. |
-| `cameraOffsetX` | number | No | Horizontal camera offset. Clamped from `-0.3` to `0.3`. |
-| `cameraZoom` | number | No | Server-side camera distance. Clamped from `0.5` to `2.0`. |
-| `gridSettings` | object | No | Custom grid appearance settings. |
-| `frameQuality` | `"standard" \| "high"` | No | Sprite frame count. `standard` is 72 frames; `high` is 144 frames. |
+| Field            | Type                              | Required | Description                                                                     |
+| ---------------- | --------------------------------- | -------- | ------------------------------------------------------------------------------- |
+| `parts`          | `{ [category]: string[] }`        | Yes      | Part IDs mapped by category. The object cannot be empty.                        |
+| `format`         | `"video" \| "sprite"`             | No       | Output format. Default is `"video"`.                                            |
+| `width`          | integer                           | No       | Canvas width. Must be provided with `height`. Range `256` to `8192`.            |
+| `height`         | integer                           | No       | Canvas height. Must be provided with `width`. Range `256` to `8192`.            |
+| `profile`        | `"cinematic" \| "flat" \| "fast"` | No       | Render quality profile.                                                         |
+| `scene`          | string                            | No       | Environment scene preset.                                                       |
+| `showBackground` | boolean                           | No       | Show the environment background.                                                |
+| `showGrid`       | boolean                           | No       | Show the 3D ground grid. Defaults to `true` unless profile is `flat` or `fast`. |
+| `winterMode`     | boolean                           | No       | Winter visual effects. Mutually exclusive with `springMode`.                    |
+| `springMode`     | boolean                           | No       | Spring visual effects. Mutually exclusive with `winterMode`.                    |
+| `cameraOffsetX`  | number                            | No       | Horizontal camera offset. Clamped from `-0.3` to `0.3`.                         |
+| `cameraZoom`     | number                            | No       | Server-side camera distance. Clamped from `0.5` to `2.0`.                       |
+| `gridSettings`   | object                            | No       | Custom grid appearance settings.                                                |
+| `frameQuality`   | `"standard" \| "high"`            | No       | Sprite frame count. `standard` is 72 frames; `high` is 144 frames.              |
 
 Example:
 
@@ -179,13 +184,13 @@ Required scope: `render:submit`
 
 Request body:
 
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `shareCode` | string | Yes | Share code of the build to render. |
-| `format` | `"video" \| "sprite"` | No | Output format. Default is `"video"`. |
-| `profile` | `"cinematic" \| "flat" \| "fast"` | No | Render quality profile. |
-| `width` / `height` | integer | No | Canvas dimensions. Must be provided together. Range `256` to `8192`. |
-| Render options | mixed | No | Same scene, grid, camera, seasonal, and frame-quality options as `/render-build`. |
+| Field              | Type                              | Required | Description                                                                       |
+| ------------------ | --------------------------------- | -------- | --------------------------------------------------------------------------------- |
+| `shareCode`        | string                            | Yes      | Share code of the build to render.                                                |
+| `format`           | `"video" \| "sprite"`             | No       | Output format. Default is `"video"`.                                              |
+| `profile`          | `"cinematic" \| "flat" \| "fast"` | No       | Render quality profile.                                                           |
+| `width` / `height` | integer                           | No       | Canvas dimensions. Must be provided together. Range `256` to `8192`.              |
+| Render options     | mixed                             | No       | Same scene, grid, camera, seasonal, and frame-quality options as `/render-build`. |
 
 Example:
 
@@ -241,12 +246,8 @@ Response:
     "PCCase": ["qq9jamk7c"]
   },
   "partDetails": {
-    "CPU": [
-      { "id": "7xjqsomhr", "name": "AMD Ryzen 7 9800X3D", "image": "https://...", "category": "CPU" }
-    ],
-    "GPU": [
-      { "id": "z7pyphm9k", "name": "ASUS GeForce RTX 5080 ASTRAL", "image": "https://...", "category": "GPU" }
-    ]
+    "CPU": [{ "id": "7xjqsomhr", "name": "AMD Ryzen 7 9800X3D", "image": "https://...", "category": "CPU" }],
+    "GPU": [{ "id": "z7pyphm9k", "name": "ASUS GeForce RTX 5080 ASTRAL", "image": "https://...", "category": "GPU" }]
   },
   "hasInteractiveModel": true
 }
@@ -260,9 +261,9 @@ Required scope: `data:read`
 
 Request body:
 
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `ids` | string[] | Yes | Array of BuildCores part IDs. Max `100`. An empty array returns `{ "parts": [] }`. |
+| Field | Type     | Required | Description                                                                        |
+| ----- | -------- | -------- | ---------------------------------------------------------------------------------- |
+| `ids` | string[] | Yes      | Array of BuildCores part IDs. Max `100`. An empty array returns `{ "parts": [] }`. |
 
 Response:
 

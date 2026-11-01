@@ -1,0 +1,13 @@
+{
+  "name": "buildcores-sdk-v1-example",
+  "private": true,
+  "description": "Minimal 3D PC Builder Sample for BuildCores SDK v1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check merchant.mjs && node --check public/storefront.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,6 +1,30 @@
-# @buildcores/render-client
+# @buildcores/render-client — Cloud SDK Beta
 
-[Documentation](https://buildcores.github.io/buildcores-render-client/) | [Technical API Docs](https://buildcores.github.io/buildcores-render-client/technical-documentation/)
+[Documentation](https://buildcores.github.io/buildcores-render-client/) | [SDK v1.0 Get started](https://buildcores.github.io/buildcores-render-client/sdk/get-started/) | [Cloud SDK Beta reference](https://buildcores.github.io/buildcores-render-client/technical-documentation/)
+
+This package is the **Cloud SDK Beta** React client. The new **SDK v1.0** iframe
+integration uses a separate hosted browser module; see its Get started guide
+above. The existing package API and examples below remain the cloud reference.
+
+## SDK v1.0 sample
+
+[3D PC Builder Sample](./example-sdk-v1/README.md): a plain JavaScript storefront
+and Node backend with guest sessions, token renewal, and custom 3D controls.
+The default configuration uses stateless PC mode; saved PC and Setup modes are
+also included. No React or frontend package installation is required.
+
+## Run the documentation locally
+
+```bash
+cd docs-portal
+npm ci
+npm start
+```
+
+Open [the local docs](http://127.0.0.1:4177/buildcores-render-client/).
+`npm run build` in `docs-portal` checks the production documentation build.
+
+## Cloud SDK Beta package
 
 A React component library for interactive 360-degree PC build rendering with drag-to-scrub functionality. Create immersive 3D visualizations of computer builds that users can rotate and explore.
 
@@ -30,18 +54,13 @@ function App() {
       PSU: ["m4kilv190"], // LIAN LI 1300W
       Storage: ["0bkvs17po"], // SAMSUNG 990 EVO
       PCCase: ["qq9jamk7c"], // MONTECH KING 95 PRO
-      CPUCooler: ["62d8zelr5"], // ARCTIC LIQUID FREEZER 360
-    },
+      CPUCooler: ["62d8zelr5"] // ARCTIC LIQUID FREEZER 360
+    }
   };
 
   return (
     <div>
-      <BuildRender
-        parts={parts}
-        size={500}
-        mouseSensitivity={0.2}
-        touchSensitivity={0.2}
-      />
+      <BuildRender parts={parts} size={500} mouseSensitivity={0.2} touchSensitivity={0.2} />
     </div>
   );
 }
@@ -65,9 +84,9 @@ const apiConfig = {
     const data = await res.json();
     return {
       token: data.session_token,
-      expiresAt: data.expires_at,
+      expiresAt: data.expires_at
     };
-  },
+  }
 };
 ```
 
@@ -82,16 +101,16 @@ The main React component for rendering interactive 3D PC builds.
 
 #### Props
 
-| Prop               | Type                 | Required | Default | Description                              |
-| ------------------ | -------------------- | -------- | ------- | ---------------------------------------- |
-| `parts`            | `RenderBuildRequest` | ✅       | -       | PC parts configuration object            |
-| `size`             | `number`             | ✅       | -       | Video size in pixels (square dimensions) |
-| `mouseSensitivity` | `number`             | ❌       | `0.2`   | Mouse drag sensitivity (0.001-1)         |
-| `touchSensitivity` | `number`             | ❌       | `0.2`   | Touch drag sensitivity (0.001-1)         |
-| `modelQuality` | `"low" \| "medium" \| "high"` | ❌ | API default | 3D model asset quality for server renders |
-| `showInteractiveConfigButton` | `boolean` | ❌ | `false` | Show the embedded fan/radiator configuration menu for parts-based async renders |
-| `interactiveConfigPanelPosition` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | ❌ | `"top-left"` | Corner where the embedded configuration menu opens |
-| `interactiveConfigPanelHeight` | `"compact" \| "max" \| number \| string` | ❌ | `"max"` | Height for the embedded configuration menu |
+| Prop                             | Type                                                           | Required | Default      | Description                                                                     |
+| -------------------------------- | -------------------------------------------------------------- | -------- | ------------ | ------------------------------------------------------------------------------- |
+| `parts`                          | `RenderBuildRequest`                                           | ✅       | -            | PC parts configuration object                                                   |
+| `size`                           | `number`                                                       | ✅       | -            | Video size in pixels (square dimensions)                                        |
+| `mouseSensitivity`               | `number`                                                       | ❌       | `0.2`        | Mouse drag sensitivity (0.001-1)                                                |
+| `touchSensitivity`               | `number`                                                       | ❌       | `0.2`        | Touch drag sensitivity (0.001-1)                                                |
+| `modelQuality`                   | `"low" \| "medium" \| "high"`                                  | ❌       | API default  | 3D model asset quality for server renders                                       |
+| `showInteractiveConfigButton`    | `boolean`                                                      | ❌       | `false`      | Show the embedded fan/radiator configuration menu for parts-based async renders |
+| `interactiveConfigPanelPosition` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | ❌       | `"top-left"` | Corner where the embedded configuration menu opens                              |
+| `interactiveConfigPanelHeight`   | `"compact" \| "max" \| number \| string`                       | ❌       | `"max"`      | Height for the embedded configuration menu                                      |
 
 #### Parts Configuration
 
@@ -103,9 +122,20 @@ interface RenderBuildRequest {
     [K in PartCategory]?: string[];
   };
   format?: "video" | "sprite";
-  width?: number;  // Optional: Canvas pixel width (256-2000)
+  width?: number; // Optional: Canvas pixel width (256-2000)
   height?: number; // Optional: Canvas pixel height (256-2000)
-  scene?: "sunset" | "dawn" | "night" | "warehouse" | "forest" | "apartment" | "studio" | "studio_v2" | "city" | "park" | "lobby";
+  scene?:
+    | "sunset"
+    | "dawn"
+    | "night"
+    | "warehouse"
+    | "forest"
+    | "apartment"
+    | "studio"
+    | "studio_v2"
+    | "city"
+    | "park"
+    | "lobby";
   showBackground?: boolean;
   showGrid?: boolean;
   winterMode?: boolean; // mutually exclusive with springMode
@@ -121,7 +151,7 @@ enum PartCategory {
   PSU = "PSU",
   Storage = "Storage",
   PCCase = "PCCase",
-  CPUCooler = "CPUCooler",
+  CPUCooler = "CPUCooler"
 }
 ```
 
@@ -145,8 +175,8 @@ const completeBuild = {
     PSU: ["m4kilv190"], // LIAN LI 1300W
     Storage: ["0bkvs17po"], // SAMSUNG 990 EVO
     PCCase: ["qq9jamk7c"], // MONTECH KING 95 PRO
-    CPUCooler: ["62d8zelr5"], // ARCTIC LIQUID FREEZER 360
-  },
+    CPUCooler: ["62d8zelr5"] // ARCTIC LIQUID FREEZER 360
+  }
 };
 
 <BuildRender parts={completeBuild} size={500} />;
@@ -157,8 +187,8 @@ const completeBuild = {
 ```tsx
 const caseOnly = {
   parts: {
-    PCCase: ["qq9jamk7c"], // MONTECH KING 95 PRO
-  },
+    PCCase: ["qq9jamk7c"] // MONTECH KING 95 PRO
+  }
 };
 
 <BuildRender parts={caseOnly} size={500} />;
@@ -176,10 +206,10 @@ const highResBuild = {
     PSU: ["m4kilv190"],
     Storage: ["0bkvs17po"],
     PCCase: ["qq9jamk7c"],
-    CPUCooler: ["62d8zelr5"],
+    CPUCooler: ["62d8zelr5"]
   },
-  width: 1920,   // Custom resolution width
-  height: 1080,  // Custom resolution height
+  width: 1920, // Custom resolution width
+  height: 1080 // Custom resolution height
 };
 
 <BuildRender parts={highResBuild} size={500} />;
@@ -284,19 +314,11 @@ type AvailablePartsResponse = {
 
 ```tsx
 import { useState, useEffect } from "react";
-import {
-  BuildRender,
-  getAvailableParts,
-  type AvailablePartsResponse,
-} from "@buildcores/render-client";
+import { BuildRender, getAvailableParts, type AvailablePartsResponse } from "@buildcores/render-client";
 
 function PCBuildConfigurator() {
-  const [availableParts, setAvailableParts] = useState<AvailablePartsResponse>(
-    {} as AvailablePartsResponse
-  );
-  const [selectedParts, setSelectedParts] = useState<Record<string, string>>(
-    {}
-  );
+  const [availableParts, setAvailableParts] = useState<AvailablePartsResponse>({} as AvailablePartsResponse);
+  const [selectedParts, setSelectedParts] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -330,9 +352,9 @@ function PCBuildConfigurator() {
     parts: Object.fromEntries(
       Object.entries(selectedParts).map(([category, partId]) => [
         category,
-        [partId], // Wrap in array as required
+        [partId] // Wrap in array as required
       ])
-    ),
+    )
   };
 
   return (
@@ -348,7 +370,7 @@ function PCBuildConfigurator() {
             onChange={(e) =>
               setSelectedParts((prev) => ({
                 ...prev,
-                [category]: e.target.value,
+                [category]: e.target.value
               }))
             }
           >

@@ -7,8 +7,8 @@ const interestFormUrl =
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
-  title: "BuildCores API Docs",
-  tagline: "Product and technical documentation for BuildCores rendering integrations",
+  title: "BuildCores SDK Docs",
+  tagline: "BuildCores SDK documentation",
   favicon: "img/logo.png",
 
   url: "https://buildcores.github.io",
@@ -20,7 +20,7 @@ const config = {
   onBrokenLinks: "throw",
   markdown: {
     hooks: {
-      onBrokenMarkdownLinks: "warn"
+      onBrokenMarkdownLinks: "throw"
     }
   },
 
@@ -38,7 +38,7 @@ const config = {
           path: "../docs",
           routeBasePath: "/",
           sidebarPath: require.resolve("./sidebars.js"),
-          editUrl: "https://github.com/buildcores/buildcores-render-client/tree/main"
+          editUrl: "https://github.com/buildcores/buildcores-render-client/tree/main/docs-portal/"
         },
         blog: false,
         theme: {
@@ -67,25 +67,17 @@ const config = {
   themeConfig:
     /** @type {import("@docusaurus/preset-classic").ThemeConfig} */
     ({
-      announcementBar: {
-        id: "september-production-api-release",
-        content: `The production release of the BuildCores API is coming later in September. Stay tuned and <a href="${interestFormUrl}" target="_blank" rel="noopener noreferrer">sign up for updates</a>.`,
-        backgroundColor: "#fce8f5",
-        textColor: "#17181d",
-        isCloseable: false
-      },
       navbar: {
-        title: "BuildCores API Docs",
+        title: "BuildCores SDK Docs",
         logo: {
           alt: "BuildCores Logo",
           src: "img/logo.png"
         },
         items: [
           {
-            type: "docSidebar",
-            sidebarId: "docs",
+            to: "/sdk/",
             position: "left",
-            label: "Docs"
+            label: "SDK v1.0"
           },
           {
             to: "/product-whitepaper/",
@@ -94,7 +86,7 @@ const config = {
           },
           {
             to: "/technical-documentation/",
-            label: "Technical",
+            label: "Cloud SDK Beta",
             position: "left"
           },
           {
@@ -125,11 +117,11 @@ const config = {
                 to: "/"
               },
               {
-                label: "Product Whitepaper",
-                to: "/product-whitepaper/"
+                label: "Get started",
+                to: "/sdk/get-started/"
               },
               {
-                label: "Technical Documentation",
+                label: "Cloud SDK Beta",
                 to: "/technical-documentation/"
               }
             ]
@@ -138,7 +130,7 @@ const config = {
             title: "BuildCores",
             items: [
               {
-                label: "@buildcores/render-client",
+                label: "Cloud SDK Beta package",
                 href: "https://github.com/buildcores/buildcores-render-client"
               },
               {

@@ -1,0 +1,248 @@
+/* Match the website bento: dark surfaces, rounded frames, and subtle edge highlights. */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-areas:
+    "models specs"
+    "models rendering"
+    "customization setup";
+  gap: 12px;
+  margin: 2rem 0 2.5rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: flex-end;
+  isolation: isolate;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 26px;
+  background: #0d0d11;
+  color: #fff;
+  box-shadow: inset 0 2px 12px rgb(255 255 255 / 5%);
+}
+
+.card::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 90deg,
+    rgb(108 108 108 / 15%),
+    rgb(255 255 255 / 50%),
+    rgb(64 64 64 / 35%),
+    #fff,
+    rgb(108 108 108 / 15%)
+  );
+  opacity: 0.3;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  content: "";
+  pointer-events: none;
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+}
+
+.copy h2 {
+  margin: 0 0 9px;
+  color: #fff;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.copy p {
+  margin: 0;
+  color: #b7b7c1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.models {
+  grid-area: models;
+  min-height: 550px;
+}
+
+.modelImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 45% top;
+}
+
+.models .copy {
+  padding-top: 120px;
+  background: linear-gradient(transparent, rgb(13 13 17 / 90%) 42%, #0d0d11);
+}
+
+.models h2 {
+  max-width: 380px;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: #efb4df;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.specs {
+  grid-area: specs;
+  background: radial-gradient(ellipse at top, rgb(172 56 129 / 14%), transparent 75%), #0d0d11;
+}
+
+.catalog {
+  display: grid;
+  gap: 7px;
+  padding: 24px 24px 0;
+}
+
+.catalog span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 3%);
+  color: #d5d5de;
+  font-size: 0.8rem;
+}
+
+.catalog span::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e7a7dd;
+  content: "";
+}
+
+.rendering {
+  grid-area: rendering;
+  background: radial-gradient(ellipse at top, rgb(100 127 211 / 18%), transparent 75%), #0d0d11;
+}
+
+.viewer {
+  width: calc(100% - 48px);
+  margin: 24px auto 0;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 20%);
+}
+
+.viewer img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.customization,
+.setup {
+  min-height: 430px;
+}
+
+.customization {
+  grid-area: customization;
+  background: radial-gradient(ellipse at 50% 35%, rgb(150 52 214 / 18%), transparent 65%), #0d0d11;
+}
+
+.setup {
+  grid-area: setup;
+  background: radial-gradient(ellipse at 50% 35%, rgb(30 125 209 / 18%), transparent 65%), #0d0d11;
+}
+
+.rgbImage,
+.setupImage {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 85%;
+  height: 310px;
+  object-fit: contain;
+  transform: translateX(-50%);
+}
+
+.setupImage {
+  top: -6px;
+  width: 100%;
+}
+
+.customization .copy,
+.setup .copy {
+  padding-top: 60px;
+  background: linear-gradient(transparent, #0d0d11 42%);
+}
+
+.beta {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 8px;
+  border: 1px solid rgb(120 189 244 / 25%);
+  border-radius: 6px;
+  color: #b4dcff;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  color: #b4dcff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.link:hover {
+  color: #fff;
+}
+
+.link:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid #b4dcff;
+  outline-offset: 4px;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "models" "specs" "rendering" "customization" "setup";
+  }
+
+  .card {
+    border-radius: 20px;
+  }
+
+  .models {
+    min-height: 420px;
+  }
+
+  .models h2 {
+    font-size: 1.8rem;
+  }
+
+  .customization,
+  .setup {
+    min-height: 410px;
+  }
+}

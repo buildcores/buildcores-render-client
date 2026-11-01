@@ -10,8 +10,23 @@ const sidebars = {
     },
     {
       type: "category",
-      label: "Product Whitepaper",
+      label: "SDK v1.0",
       collapsed: false,
+      link: { type: "doc", id: "sdk/overview" },
+      items: [
+        { type: "doc", id: "sdk/get-started", label: "Get started" },
+        { type: "doc", id: "sdk/quickstart", label: "Browser quickstart" },
+        { type: "doc", id: "sdk/setup-builder", label: "Setup Builder (Beta)" },
+        { type: "doc", id: "sdk/sample", label: "3D PC Builder Sample" },
+        { type: "doc", id: "sdk/authentication", label: "Backend authentication" },
+        { type: "doc", id: "sdk/client-reference", label: "SDK reference" },
+        { type: "doc", id: "sdk/catalog", label: "Catalog mapping" }
+      ]
+    },
+    {
+      type: "category",
+      label: "Product Whitepaper",
+      collapsed: true,
       items: [
         {
           type: "doc",
@@ -22,8 +37,8 @@ const sidebars = {
     },
     {
       type: "category",
-      label: "Technical Documentation",
-      collapsed: false,
+      label: "Cloud SDK Beta",
+      collapsed: true,
       items: [
         {
           type: "doc",

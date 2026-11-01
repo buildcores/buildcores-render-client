@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>3D PC Builder Sample</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/storefront.mjs"></script>
+  </head>
+  <body>
+    <main>
+      <header class="intro">
+        <div>
+          <h1 id="title">3D PC Builder Sample</h1>
+          <p>Swap parts, place fans, and customize lighting in 3D.</p>
+        </div>
+        <div class="intro-actions">
+          <span id="connection" role="status">Connecting…</span>
+          <button id="tour" class="primary" disabled>Run feature demo</button>
+        </div>
+      </header>
+      <div class="workspace">
+        <section class="preview" aria-label="3D preview">
+          <div class="preview-bar"><strong>3D preview</strong><span>Drag to orbit · Scroll to zoom</span></div>
+          <iframe
+            id="renderer"
+            title="BuildCores 3D PC viewer"
+            referrerpolicy="strict-origin"
+            sandbox="allow-scripts allow-same-origin"
+          ></iframe>
+          <p id="revision" class="preview-caption">Waiting for your configuration</p>
+        </section>
+        <aside class="customizer" aria-label="Builder features">
+          <p id="persistence-note" class="panel-note">Choose your configuration.</p>
+          <p id="error" role="alert" hidden></p>
+          <fieldset id="controls" disabled>
+            <details class="feature" name="features" open>
+              <summary>Parts</summary>
+              <div class="feature-content">
+                <label for="build">PC</label>
+                <select id="build"></select>
+                <label for="part-category">Component</label>
+                <select id="part-category">
+                  <option value="GPU">Graphics card</option>
+                  <option value="PCCase">Case</option>
+                  <option value="CPU">Processor</option>
+                  <option value="Motherboard">Motherboard</option>
+                  <option value="RAM">Memory</option>
+                  <option value="CPUCooler">CPU cooler</option>
+                  <option value="CaseFan">Case fan</option>
+                  <option value="Storage">Storage</option>
+                  <option value="PSU">Power supply</option>
+                </select>
+                <div class="input-row">
+                  <input id="part-query" aria-label="Search parts" placeholder="Search parts" />
+                  <button id="search-parts">Search</button>
+                </div>
+                <select id="catalog" aria-label="Matching parts"></select>
+                <label for="instance">Installed part</label>
+                <select id="instance"></select>
+                <div class="button-row">
+                  <button id="replace-part">Replace</button>
+                  <button id="add-part">Add</button>
+                  <button id="remove-part">Remove</button>
+                </div>
+              </div>
+            </details>
+            <details class="feature" name="features">
+              <summary>RGB lighting</summary>
+              <div class="feature-content">
+                <div class="lighting-row">
+                  <label for="rgb-color">Color</label>
+                  <input type="color" id="rgb-color" value="#8cffb5" />
+                </div>
+                <label for="brightness">Brightness <output id="brightness-value">80%</output></label>
+                <input id="brightness" type="range" min="0" max="100" value="80" />
+                <button id="apply-rgb">Apply lighting</button>
+              </div>
+            </details>
+            <details class="feature" name="features">
+              <summary>Case fans</summary>
+              <div class="feature-content">
+                <p class="hint">Add a case fan under Parts, then place it in a compatible slot.</p>
+                <label for="fan">Fan</label>
+                <select id="fan"></select>
+                <label for="fan-slot">Slot</label>
+                <select id="fan-slot"></select>
+                <button id="place-fan">Place fan</button>
+                <label for="placement">Placed fan</label>
+                <select id="placement"></select>
+                <label for="move-slot">Move to</label>
+                <select id="move-slot"></select>
+                <div class="button-row">
+                  <button id="move-fan">Move</button>
+                  <button id="flip-fan">Flip</button>
+                  <button id="remove-fan">Remove</button>
+                </div>
+              </div>
+            </details>
+            <details class="feature" name="features">
+              <summary>Scene</summary>
+              <div class="feature-content">
+                <label for="quality">Render quality</label>
+                <select id="quality">
+                  <option value="high">High</option>
+                  <option value="medium">Balanced</option>
+                  <option value="low">Fast</option>
+                </select>
+                <label class="check"><input id="grid" type="checkbox" /> Show grid</label>
+                <label class="check"><input id="background" type="checkbox" /> Show environment</label>
+                <div class="button-row">
+                  <button id="apply-render">Apply scene</button>
+                  <button id="reset-camera">Reset camera</button>
+                </div>
+              </div>
+            </details>
+            <details class="feature" name="features">
+              <summary>Setup Builder <span class="beta">Beta</span></summary>
+              <div class="feature-content">
+                <p class="hint" id="setup-note">Use a Setup source to add desk products and adjust their position.</p>
+                <fieldset id="setup-controls" disabled>
+                  <div class="button-row">
+                    <button id="view-build">PC view</button>
+                    <button id="view-setup">Setup view</button>
+                  </div>
+                  <label for="setup-category">Product</label>
+                  <select id="setup-category">
+                    <option value="Keyboard">Keyboard</option>
+                    <option value="Mouse">Mouse</option>
+                    <option value="Monitor">Monitor</option>
+                    <option value="Desk">Desk</option>
+                    <option value="Chair">Chair</option>
+                    <option value="Speaker">Speakers</option>
+                    <option value="Mousepad">Mousepad</option>
+                    <option value="Lighting">Lighting</option>
+                  </select>
+                  <div class="input-row">
+                    <input id="setup-query" aria-label="Search setup products" placeholder="Search products" />
+                    <button id="search-setup">Search</button>
+                  </div>
+                  <select id="setup-catalog" aria-label="Matching setup products"></select>
+                  <button id="add-product">Add to setup</button>
+                  <label for="entity">Setup item</label>
+                  <select id="entity"></select>
+                  <div class="button-row">
+                    <button id="replace-product">Replace</button>
+                    <button id="copy-product">Copy</button>
+                    <button id="toggle-product">Hide / show</button>
+                    <button id="remove-product">Remove</button>
+                  </div>
+                  <label>Position in meters <span class="hint">X / Y / Z</span></label>
+                  <div class="position-row">
+                    <input id="position-x" type="number" step="0.05" value="0" aria-label="Position X" />
+                    <input id="position-y" type="number" step="0.05" value="0" aria-label="Position Y" />
+                    <input id="position-z" type="number" step="0.05" value="0" aria-label="Position Z" />
+                  </div>
+                  <button id="position-product">Position item</button>
+                </fieldset>
+              </div>
+            </details>
+            <details class="feature" name="features">
+              <summary>Model options</summary>
+              <div class="feature-content advanced">
+                <p class="hint">Discover and edit the selected model's supported settings.</p>
+                <button id="discover">Discover controls</button>
+                <select id="descriptor" aria-label="Model setting"></select>
+                <textarea id="configuration" aria-label="Setting value" rows="7" spellcheck="false"></textarea>
+                <button id="apply-configuration">Apply setting</button>
+              </div>
+            </details>
+          </fieldset>
+        </aside>
+      </div>
+      <details class="activity">
+        <summary>SDK activity</summary>
+        <ol id="activity" aria-label="SDK activity"></ol>
+      </details>
+      <footer>
+        <a href="https://buildcores.github.io/buildcores-render-client/sdk/">BuildCores SDK v1.0</a>
+      </footer>
+    </main>
+  </body>
+</html>
