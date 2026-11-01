@@ -1,7 +1,7 @@
 ---
 title: SDK v1.0
 description: Accurate 3D PC models, maintained hardware specs, and fast browser rendering for your website.
-slug: /sdk/
+slug: /
 hide_table_of_contents: true
 ---
 
