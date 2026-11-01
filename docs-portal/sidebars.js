@@ -4,11 +4,6 @@
 const sidebars = {
   docs: [
     {
-      type: "doc",
-      id: "index",
-      label: "Overview"
-    },
-    {
       type: "category",
       label: "SDK v1.0",
       collapsed: false,

@@ -19,7 +19,7 @@ export default function SdkBenefits() {
           height="700"
         />
         <div className={styles.copy}>
-          <span className={styles.eyebrow}>Real hardware. Every detail.</span>
+          <span className={styles.eyebrow}>Over 5,000 accurate 3D models</span>
           <h2>The most accurate 3D models of PC parts</h2>
           <p>Give shoppers a faithful preview of the parts they are buying.</p>
         </div>

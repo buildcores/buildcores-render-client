@@ -1,23 +1,22 @@
 ---
-title: SDK v1.0
+title: BuildCores 1.0 SDK
 description: Accurate 3D PC models, maintained hardware specs, and fast browser rendering for your website.
-slug: /sdk/
+slug: /
 hide_table_of_contents: true
 ---
 
 import Link from "@docusaurus/Link";
 import SdkBenefits from "@site/src/components/SdkBenefits";
 
-# BuildCores SDK v1.0
+# BuildCores 1.0 SDK
 
-Bring real PC hardware to your website. Add an interactive 3D configurator with
-your own controls or the built-in editor.
+Bring a best in class experience for PC and Setup Builders to your own website or app.
+Integrate BuildCores product data, advanced 3D rendering capabilities, and extensive
+customization options to best suit your brand.
 
 <Link className="button button--primary" to="/sdk/get-started/">Get started</Link>
 
 <SdkBenefits />
-
-Your backend handles access; BuildCores handles the viewer and 3D models.
 
 ## Hosted SDK
 

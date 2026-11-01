@@ -75,7 +75,7 @@ const config = {
         },
         items: [
           {
-            to: "/sdk/",
+            to: "/",
             position: "left",
             label: "SDK v1.0"
           },

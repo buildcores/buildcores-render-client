@@ -19,12 +19,12 @@ export function exactOrigin(value) {
   return url.origin;
 }
 
-/** This is merchant-server code. The private Render API credential never reaches the storefront. */
+/** This is merchant-server code. Your private BuildCores API key never reaches the storefront. */
 export async function provisionRetailer({ config, apiKey, fetchApi = fetch }) {
   const origin = exactOrigin(config.renderApiOrigin);
   const merchantOrigin = exactOrigin(config.merchantOrigin);
   if (!["staging", "prod"].includes(config.environment) || !apiKey) {
-    throw new Error("A Render API key and staging or prod environment are required");
+    throw new Error("A BuildCores API key and staging or prod environment are required");
   }
   async function manage(path, method = "GET", data) {
     const response = await fetchApi(`${origin}${path}?environment=${config.environment}`, {
@@ -35,7 +35,7 @@ export async function provisionRetailer({ config, apiKey, fetchApi = fetch }) {
     if (!response.ok) throw new Error(`Demo provisioning failed (${response.status})`);
     return response.json();
   }
-  // hideUi is customer-wide. Use a dedicated demo customer, not a production merchant account.
+  // hideUi applies to all embeds for your BuildCores account, across staging and production.
   await manage("/embed-config", "PATCH", { embed: { hideUi: true } });
   const registrations = await manage("/embeds");
   const existing = registrations.find(

@@ -9,7 +9,7 @@ disclaimer, and save feedback.
 
 ## Run locally
 
-Requires Node 22+ and a dedicated demo customer's staging API key and key ID.
+Requires Node 22+ and your BuildCores staging API key and key ID.
 
 From the repository root:
 
@@ -22,8 +22,8 @@ Replace the part placeholders in `config.json` with public BuildCores IDs.
 Use [Catalog mapping](https://buildcores.github.io/buildcores-render-client/sdk/catalog/)
 to map your products. The API host is `https://www.renderapi.buildcores.com`.
 
-Set `RENDER_API_KEY` and `RENDER_API_KEY_ID` in the server process environment,
-then run:
+Set your BuildCores API key as `BUILDCORES_API_KEY` and your key ID as
+`BUILDCORES_API_KEY_ID` in the server process environment, then run:
 
 ```bash
 node server.mjs config.json
@@ -33,9 +33,9 @@ Open [localhost:3090](http://localhost:3090). Use this exact origin; if you
 change it, update `merchantOrigin` in the config. `npm start` runs the same server
 with `config.json`.
 
-Startup registers the storefront origin and sets `embed.hideUi: true` for the
-demo customer. This hides built-in controls across that customer's staging and
-production embeds. Use a dedicated demo customer.
+Startup registers your storefront origin and sets `embed.hideUi: true` for your
+BuildCores account. This hides built-in controls across all your staging and
+production embeds.
 
 ## PC configuration
 
@@ -57,9 +57,9 @@ defaults, such as `{ "GPU": "GeForce", "CaseFan": "120" }`.
 ## Saved PC or Setup
 
 Use `config.saved.example.json` as the template instead. Set `source.shareCode`
-to a customer-owned or authorized published Build. **Setup Builder mode is in beta.**
+to a Build owned by your BuildCores account or an authorized published Build. **Setup Builder mode is in beta.**
 For desk products and positioning, set `source.kind` to `"setup"` and use an authorized Setup containing
-a PC. The customer must also be authorized for any attached PCs.
+a PC. Your account must also be authorized for any attached PCs.
 
 Saved mode autosaves changes and reopens the same guest configuration after a
 refresh. Keep `preset` out of saved-mode configuration so reopening does not
@@ -79,7 +79,7 @@ These are the same contracts described in the documentation under
 `/api/buildcores/editor/open` and `/api/buildcores/editor/renew`; the sample uses
 shorter route names.
 
-The backend keeps the API key private. An HttpOnly guest cookie identifies the
+The backend keeps your BuildCores API key private. An HttpOnly guest cookie identifies the
 visitor; no shopper login is required. Renewal checks that the visitor owns the
 session and preserves its identity. The SDK connects before the iframe loads.
 

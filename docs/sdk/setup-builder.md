@@ -19,7 +19,7 @@ target:
 { "kind": "setup", "shareCode": "YOUR_SETUP_SHARE_CODE" }
 ```
 
-Your customer must own the source Setup and its attached PCs, or have permission
+Your BuildCores account must own the source Setup and its attached PCs, or have permission
 to use the published source. The source stays unchanged; shoppers edit a separate
 saved configuration.
 
