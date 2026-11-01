@@ -89,7 +89,7 @@ For [Setup Builder (Beta)](./setup-builder.md):
 { "kind": "setup", "shareCode": "YOUR_SETUP_SHARE_CODE" }
 ```
 
-The customer must own the source, including attached PCs, or use an authorized
+Your BuildCores account must own the source, including attached PCs, or use an authorized
 published source. Sources stay unchanged. A different source needs a new embed.
 Issue `access: "edit"` tokens with a stable, backend-owned `externalBuildId`.
 
@@ -115,7 +115,7 @@ The built-in editor is visible by default. To hide its controls, call
 { "embed": { "hideUi": true } }
 ```
 
-This setting applies to the whole customer, across staging and production, on
+This setting applies to your whole BuildCores account, across staging and production, on
 next open/reload. Branding, disclaimer, save status, and error feedback remain.
 Your page can then use the SDK commands to provide controls.
 

@@ -21,12 +21,12 @@ cp config.example.json config.json
 ```
 
 1. Replace the part placeholders with [mapped BuildCores IDs](./catalog.md).
-2. Set your demo customer's `RENDER_API_KEY` and `RENDER_API_KEY_ID` in the server
-   process environment.
+2. Set your BuildCores API key as `BUILDCORES_API_KEY` and your key ID as
+   `BUILDCORES_API_KEY_ID` in the server process environment.
 3. Run `node server.mjs config.json`, then open [localhost:3090](http://localhost:3090).
 
-Startup registers that storefront origin and hides the built-in controls for the
-whole demo customer, across staging and production. Use a dedicated demo customer.
+Startup registers your storefront origin and hides the built-in controls for your
+BuildCores account, across all your staging and production embeds.
 
 The default PC sample keeps edits in the browser. `config.saved.example.json`
 also supports saved PCs and [Setup Builder (Beta)](./setup-builder.md).

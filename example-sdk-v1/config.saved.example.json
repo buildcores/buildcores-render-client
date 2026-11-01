@@ -6,6 +6,6 @@
   "title": "3D PC Builder Sample",
   "source": {
     "kind": "build",
-    "shareCode": "REPLACE_WITH_YOUR_CUSTOMER_OWNED_BUILD_SHARE_CODE"
+    "shareCode": "YOUR_BUILD_SHARE_CODE"
   }
 }
