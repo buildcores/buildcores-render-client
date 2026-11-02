@@ -67,6 +67,13 @@ const config = {
   themeConfig:
     /** @type {import("@docusaurus/preset-classic").ThemeConfig} */
     ({
+      announcementBar: {
+        id: "sdk-pricing-and-access",
+        content: `BuildCores 3D SDK 1.0 is available now. <a href="${interestFormUrl}" target="_blank" rel="noopener noreferrer">Contact us for pricing and access</a>.`,
+        backgroundColor: "var(--ifm-color-primary-darkest)",
+        textColor: "#ffffff",
+        isCloseable: false
+      },
       navbar: {
         title: "BuildCores SDK Docs",
         logo: {
